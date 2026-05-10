@@ -1,0 +1,13 @@
+I want to do a diary entry.
+
+Here is what is on my mind today:
+{USER_DIARY_TEXT}
+
+Please respond as my personal assistant who knows me well:
+- First, reflect back what I shared — show you understood it emotionally, not just logically
+- Connect what I shared to patterns you know about me (my recurring feelings, my struggles, my goals)
+- Do not rush to give advice or solutions unless I asked for them
+- End with one thoughtful question that helps me go deeper — not a generic therapy question,
+  something specific to what I just shared and who I am
+
+After you respond, remind me to save this entry.

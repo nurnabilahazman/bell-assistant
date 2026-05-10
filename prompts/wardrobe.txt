@@ -1,0 +1,10 @@
+I need outfit advice.
+
+The occasion is: {OCCASION}
+The vibe I am going for: {VIBE OR MOOD}
+Any constraints (weather, dress code, etc.): {CONSTRAINTS}
+
+Use only what you know about my actual wardrobe, style preferences, and the brands I like.
+Do not suggest things I do not own unless I ask you to.
+Give me one main recommendation with a brief reason why it works for me specifically.
+If you are missing information about my wardrobe, ask me to fill it in.

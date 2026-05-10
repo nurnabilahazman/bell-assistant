@@ -1,0 +1,13 @@
+Help me plan my {today / this week / specific day}.
+
+Here is what I know I have:
+{USER LISTS THEIR COMMITMENTS OR LEAVES BLANK}
+
+Cross-check this against:
+- My current goals (especially this week's goals)
+- My existing schedule template
+- The habits I am building — make sure there is space for them
+- My energy patterns and personality — you know how I work best
+
+Suggest a realistic schedule. If something conflicts with my goals or values, flag it.
+Ask me before making any changes to the saved schedule.

@@ -1,0 +1,7 @@
+I want to update my profile.
+
+Section to update: {SECTION NAME}
+What I want to change or add: {USER DESCRIBES THE UPDATE}
+
+Confirm what you are going to save before saving it.
+After saving, let me know exactly what changed and in which file.
