@@ -72,7 +72,8 @@ section[data-testid="stSidebar"] { display: none !important; }
 [data-testid="stSidebarCollapsedControl"] { display: none !important; }
 div[data-testid="stExpander"] details { background: #12121F !important; border: 1px solid #252538 !important; border-radius: 10px !important; }
 .nav-bar button { border-radius: 8px !important; font-size: 0.78rem !important; padding: 6px 4px !important; }
-div[data-testid="stMainBlockContainer"] { padding-top: 12px !important; }
+div[data-testid="stMainBlockContainer"] { padding-top: 12px !important; max-width: 1100px !important; }
+section[data-testid="stMain"] { overflow-y: auto !important; }
 @media (max-width: 768px) {
   .card { padding: 12px 14px !important; margin-bottom: 8px !important; }
   .hero { padding: 18px 16px !important; }
@@ -406,10 +407,10 @@ if page == "🏠  Home":
         on_period   = td.get("on_period", False)
         solat_saved = td.get("solat", [])
         SOLAT_LIST  = [("Subuh","🌅"),("Zuhur","☀️"),("Asar","🌤️"),("Maghrib","🌆"),("Isyak","🌙")]
-        st.markdown('<div style="font-size:0.68rem;color:#C9A84C;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Solat 5 Waktu</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:0.68rem;color:#C9A84C;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">5 Daily Prayers</div>', unsafe_allow_html=True)
         if on_period:
-            st.markdown('<div style="background:rgba(233,69,96,0.08);border:1px solid rgba(233,69,96,0.25);border-radius:10px;padding:12px 14px;font-size:0.84rem;color:#E94560;font-weight:700;margin-bottom:8px;">🌸 Sedang Haid — Solat ditangguhkan</div>', unsafe_allow_html=True)
-            st.markdown('<div style="font-size:0.78rem;color:#6B7280;line-height:1.6;">Fokus pada zikir, selawat, istighfar, dan doa. Allah Maha Mengetahui usahamu. 🤍</div>', unsafe_allow_html=True)
+            st.markdown('<div style="background:rgba(233,69,96,0.08);border:1px solid rgba(233,69,96,0.25);border-radius:10px;padding:12px 14px;font-size:0.84rem;color:#E94560;font-weight:700;margin-bottom:8px;">🌸 On period — Prayer paused</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:0.78rem;color:#6B7280;line-height:1.6;">Focus on dhikr, selawat, istighfar, and dua. Allah knows your effort. 🤍</div>', unsafe_allow_html=True)
         else:
             with st.form("solat_form"):
                 solat_checked = []
@@ -423,8 +424,8 @@ if page == "🏠  Home":
         selawat_count = td.get("selawat", 0)
         sel_col = "#3DD68C" if selawat_count >= 1000 else "#C9A84C"
         sel_pct = min(100, round(selawat_count / 1000 * 100))
-        st.markdown(f'<div style="margin-top:10px;background:#12121F;border:1px solid #252538;border-radius:10px;padding:10px 14px;"><div style="font-size:0.66rem;color:{sel_col};font-weight:700;text-transform:uppercase;letter-spacing:1px;">Selawat & Istighfar</div><div style="font-size:1.6rem;font-weight:900;color:{sel_col};">{selawat_count:,}<span style="font-size:0.72rem;color:#6B7280;font-weight:400;"> / 1,000</span></div><div class="pb-wrap" style="margin-top:5px;"><div class="pb-fill" style="width:{sel_pct}%;background:{sel_col};"></div></div></div>', unsafe_allow_html=True)
-        if st.button("+100 Selawat", key="sel_btn", use_container_width=True):
+        st.markdown(f'<div style="margin-top:10px;background:#12121F;border:1px solid #252538;border-radius:10px;padding:10px 14px;"><div style="font-size:0.66rem;color:{sel_col};font-weight:700;text-transform:uppercase;letter-spacing:1px;">Selawat & Istighfar (Daily Dhikr)</div><div style="font-size:1.6rem;font-weight:900;color:{sel_col};">{selawat_count:,}<span style="font-size:0.72rem;color:#6B7280;font-weight:400;"> / 1,000</span></div><div class="pb-wrap" style="margin-top:5px;"><div class="pb-fill" style="width:{sel_pct}%;background:{sel_col};"></div></div></div>', unsafe_allow_html=True)
+        if st.button("+100 Dhikr", key="sel_btn", use_container_width=True):
             p = progress.get(today_iso, {}); p["selawat"] = p.get("selawat", 0) + 100
             progress[today_iso] = p; save_json("progress.json", progress); st.rerun()
 
@@ -442,7 +443,7 @@ if page == "🏠  Home":
     sunat_saved   = td.get("sunat", [])
     available_sn  = [name for _, name, restricted in SUNAT_LIST if not (on_period_sn and restricted)]
     sunat_done    = len([n for n in available_sn if n in sunat_saved])
-    st.markdown(f'<div style="background:linear-gradient(135deg,#0D1A10 0%,#0B1A14 100%);border:1px solid rgba(61,214,140,0.2);border-radius:12px;padding:12px 18px 4px;margin-top:4px;"><div style="font-size:0.66rem;color:#3DD68C;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;">Sunat & Spiritual Practice &nbsp;<span style="color:#6B7280;font-weight:400;font-style:italic;">({sunat_done}/{len(available_sn)} done{"  ·  🌸 Haid mode" if on_period_sn else ""})</span></div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="background:linear-gradient(135deg,#0D1A10 0%,#0B1A14 100%);border:1px solid rgba(61,214,140,0.2);border-radius:12px;padding:12px 18px 4px;margin-top:4px;"><div style="font-size:0.66rem;color:#3DD68C;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;">Sunnah & Spiritual Practice &nbsp;<span style="color:#6B7280;font-weight:400;font-style:italic;">({sunat_done}/{len(available_sn)} done{"  ·  🌸 On period" if on_period_sn else ""})</span></div></div>', unsafe_allow_html=True)
     with st.form("sunat_form"):
         sn_cols = st.columns(len(SUNAT_LIST))
         sunat_checked = []
@@ -459,7 +460,7 @@ if page == "🏠  Home":
             st.success(f"{len(sunat_checked)}/{len(available_sn)} saved ✓"); st.rerun()
 
     # ── SEDEKAH ──────────────────────────────────────────────────
-    sec("💚", "Sedekah Harian", "Lillahi ta'ala")
+    sec("💚", "Daily Sedekah", "For the sake of Allah")
     sedekah_data  = load_json("sedekah.json", {})
     today_sed     = sedekah_data.get(today_iso)
     week_sed      = sum(sedekah_data.get(d, 0) for d in week_dates)
@@ -468,7 +469,7 @@ if page == "🏠  Home":
     today_sed_str = f"RM {today_sed:.2f}" if today_sed is not None else "—"
     se1, se2 = st.columns([3, 2])
     with se1:
-        st.markdown('<div class="deen-card"><div style="font-size:0.7rem;color:#3DD68C;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Niat Pagi</div><div style="font-size:0.87rem;color:#C8C8D8;line-height:1.65;font-style:italic;">"Aku niat bersedekah hari ini, lillahi ta\'ala."</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="deen-card"><div style="font-size:0.7rem;color:#3DD68C;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Morning Intention</div><div style="font-size:0.87rem;color:#C8C8D8;line-height:1.65;font-style:italic;">"I intend to give in charity today, for the sake of Allah."</div></div>', unsafe_allow_html=True)
         sa, sb = st.columns([3, 1])
         with sa:
             sed_in = st.number_input("RM", min_value=0.0, step=0.5, value=float(today_sed) if today_sed is not None else 1.0, key="sed_amt", format="%.2f", label_visibility="collapsed")
@@ -1877,7 +1878,7 @@ elif page == "✅  Daily Tracker":
                 f'<span style="color:#3DD68C;">{sed_s}</span>',
                 f'<span style="color:{mc};">{MOOD_MAP.get(ml,"—")}</span>',
             ])
-        tbl(["Date","Solat","Sunat","Words","Sedekah","Mood"], wrows2)
+        tbl(["Date","Prayer","Sunnah","Words","Sedekah","Mood"], wrows2)
 
     with tab2:
         mood_data = load_json("mood.json", {})
