@@ -131,17 +131,17 @@ def save_json(fp, obj):
         json.dump(obj, open(DATA / fp, "w"), indent=2, ensure_ascii=False)
     _fetch.clear()
 
-@st.cache_data
 def load_profile():
-    if _supa:
-        try:
-            r = _supa.table("bell_store").select("key,value").like("key", "profile/%").execute()
-            if r.data and len(r.data) >= 9:
-                return {row["key"].split("/")[1].replace(".json", ""): row["value"] for row in r.data}
-        except Exception:
-            pass
-    base = Path(__file__).parent / "profile"
-    return {f.stem: json.load(open(f)) for f in base.glob("*.json")}
+    _PFILES = ['background','feelings','goals','habits','notes','personality','relationships','schedule','wardrobe']
+    result  = {fname: _fetch(f"profile/{fname}.json") for fname in _PFILES}
+    result  = {k: v for k, v in result.items() if v is not None}
+    if result:
+        return result
+    try:
+        base = Path(__file__).parent / "profile"
+        return {f.stem: json.load(open(f)) for f in base.glob("*.json")}
+    except Exception:
+        return {}
 
 P      = load_profile()
 pers   = P.get("personality", {})
@@ -425,9 +425,20 @@ if page == "🏠  Home":
         sel_col = "#3DD68C" if selawat_count >= 1000 else "#C9A84C"
         sel_pct = min(100, round(selawat_count / 1000 * 100))
         st.markdown(f'<div style="margin-top:10px;background:#12121F;border:1px solid #252538;border-radius:10px;padding:10px 14px;"><div style="font-size:0.66rem;color:{sel_col};font-weight:700;text-transform:uppercase;letter-spacing:1px;">Selawat & Istighfar (Daily Dhikr)</div><div style="font-size:1.6rem;font-weight:900;color:{sel_col};">{selawat_count:,}<span style="font-size:0.72rem;color:#6B7280;font-weight:400;"> / 1,000</span></div><div class="pb-wrap" style="margin-top:5px;"><div class="pb-fill" style="width:{sel_pct}%;background:{sel_col};"></div></div></div>', unsafe_allow_html=True)
-        if st.button("+100 Dhikr", key="sel_btn", use_container_width=True):
-            p = progress.get(today_iso, {}); p["selawat"] = p.get("selawat", 0) + 100
-            progress[today_iso] = p; save_json("progress.json", progress); st.rerun()
+        _sb1, _sb2 = st.columns(2)
+        with _sb1:
+            if st.button("+100 Dhikr", key="sel_btn", use_container_width=True, type="primary"):
+                p = progress.get(today_iso, {}); p["selawat"] = p.get("selawat", 0) + 100
+                progress[today_iso] = p; save_json("progress.json", progress); st.rerun()
+        with _sb2:
+            if st.button("✏️ Edit", key="sel_edit_btn", use_container_width=True):
+                st.session_state["sel_editing"] = True
+        if st.session_state.get("sel_editing"):
+            _new_sel = st.number_input("Set dhikr count", value=selawat_count, min_value=0, step=100, key="sel_new_val")
+            if st.button("Save", key="sel_save", type="primary"):
+                p = progress.get(today_iso, {}); p["selawat"] = _new_sel
+                progress[today_iso] = p; save_json("progress.json", progress)
+                st.session_state["sel_editing"] = False; st.rerun()
 
     # ── SUNAT & SPIRITUAL PRACTICE ───────────────────────────────
     # (emoji, label, haid_restricted)
@@ -459,15 +470,49 @@ if page == "🏠  Home":
             progress[today_iso] = p; save_json("progress.json", progress)
             st.success(f"{len(sunat_checked)}/{len(available_sn)} saved ✓"); st.rerun()
 
+    # ── TODAY'S ROUTINE ──────────────────────────────────────────
+    sec("📅", "Today's Routine", "Your autopilot schedule")
+    _sched_items = sched.get("daily_schedule", [])
+    if _sched_items:
+        _now_h = datetime.now().hour
+        _now_total = _now_h * 60 + datetime.now().minute
+        def _parse_time(t):
+            import re
+            m = re.search(r'(\d+):(\d+)\s*(AM|PM)?', str(t), re.I)
+            if not m: return -1
+            h, mi = int(m.group(1)), int(m.group(2))
+            ap = (m.group(3) or "").upper()
+            if ap == "PM" and h != 12: h += 12
+            if ap == "AM" and h == 12: h = 0
+            return h * 60 + mi
+        _sched_html = '<div style="background:#12121F;border:1px solid #252538;border-radius:10px;padding:4px 0;">'
+        for _si, _s in enumerate(_sched_items):
+            _t_start = _parse_time(_s["time"].split("–")[0].split("-")[0])
+            _t_end   = _parse_time(_s["time"].split("–")[-1].split("-")[-1]) if "–" in _s["time"] or "-" in _s["time"] else _t_start + 60
+            _is_now  = _t_start <= _now_total < _t_end if _t_start >= 0 else False
+            _bg      = "background:rgba(201,168,76,0.08);border-left:3px solid #C9A84C;" if _is_now else ""
+            _dot_col = "#C9A84C" if _is_now else "#252538"
+            _act_col = "#C9A84C" if _is_now else "#C8C8D8"
+            _sched_html += f'<div style="display:flex;gap:12px;align-items:flex-start;padding:9px 16px;border-bottom:1px solid #1A1A2E;{_bg}"><div style="min-width:90px;font-size:0.72rem;color:#6B7280;padding-top:1px;white-space:nowrap;">{_s["time"]}</div><div style="width:8px;height:8px;border-radius:50%;background:{_dot_col};margin-top:5px;flex-shrink:0;"></div><div><div style="font-size:0.84rem;color:{_act_col};font-weight:{"700" if _is_now else "400"};">{_s["activity"]}</div><div style="font-size:0.72rem;color:#6B7280;margin-top:2px;line-height:1.5;">{_s.get("notes","")}</div></div></div>'
+        _sched_html += '</div>'
+        st.markdown(_sched_html, unsafe_allow_html=True)
+    else:
+        st.markdown('<div style="font-size:0.82rem;color:#6B7280;">Schedule not loaded.</div>', unsafe_allow_html=True)
+
     # ── SEDEKAH ──────────────────────────────────────────────────
     sec("💚", "Daily Sedekah", "For the sake of Allah")
     sedekah_data  = load_json("sedekah.json", {})
+    sed_paid_data = load_json("sedekah_paid.json", {"payments": []})
     today_sed     = sedekah_data.get(today_iso)
     week_sed      = sum(sedekah_data.get(d, 0) for d in week_dates)
     month_sed     = sum(v for k, v in sedekah_data.items() if k.startswith(month_pref))
-    all_sed       = sum(sedekah_data.values())
+    all_sed       = sum(v for v in sedekah_data.values() if isinstance(v, (int, float)))
+    total_paid    = sum(p.get("amount", 0) for p in sed_paid_data.get("payments", []))
+    balance       = round(all_sed - total_paid, 2)
     today_sed_str = f"RM {today_sed:.2f}" if today_sed is not None else "—"
-    se1, se2 = st.columns([3, 2])
+    bal_col       = "#E94560" if balance > 0 else "#3DD68C"
+
+    se1, se2, se3 = st.columns([2, 2, 2])
     with se1:
         st.markdown('<div class="deen-card"><div style="font-size:0.7rem;color:#3DD68C;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Morning Intention</div><div style="font-size:0.87rem;color:#C8C8D8;line-height:1.65;font-style:italic;">"I intend to give in charity today, for the sake of Allah."</div></div>', unsafe_allow_html=True)
         sa, sb = st.columns([3, 1])
@@ -481,7 +526,19 @@ if page == "🏠  Home":
         if today_sed is not None:
             st.markdown(f'<div style="font-size:0.78rem;color:#3DD68C;margin-top:6px;">✓ Logged today: <b>RM {today_sed:.2f}</b></div>', unsafe_allow_html=True)
     with se2:
-        st.markdown(f'<div style="background:#12121F;border:1px solid #252538;border-radius:10px;padding:16px 18px;height:100%;"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;"><div><div style="font-size:0.6rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Today</div><div style="font-size:1.05rem;font-weight:800;color:#3DD68C;">{today_sed_str}</div></div><div><div style="font-size:0.6rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">This Week</div><div style="font-size:1.05rem;font-weight:800;color:#C9A84C;">RM {week_sed:.2f}</div></div><div><div style="font-size:0.6rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">All Time</div><div style="font-size:1.05rem;font-weight:800;color:#4EA8DE;">RM {all_sed:.2f}</div></div></div><div style="margin-top:14px;padding-top:12px;border-top:1px solid #1A1A2E;font-size:0.72rem;color:#6B7280;">This month: <b style="color:#9B72CF;">RM {month_sed:.2f}</b></div></div>', unsafe_allow_html=True)
+        _bal_label = "🟡 Balance to Pay" if balance > 0 else "✅ All Paid"
+        st.markdown(f'<div style="background:#12121F;border:1px solid #252538;border-radius:10px;padding:14px 16px;"><div style="font-size:0.6rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Payment Tracker</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;"><div><div style="font-size:0.58rem;color:#6B7280;margin-bottom:3px;">Total Recorded</div><div style="font-size:1rem;font-weight:800;color:#C9A84C;">RM {all_sed:.2f}</div></div><div><div style="font-size:0.58rem;color:#6B7280;margin-bottom:3px;">Total Paid</div><div style="font-size:1rem;font-weight:800;color:#3DD68C;">RM {total_paid:.2f}</div></div></div><div style="background:rgba({("233,69,96" if balance>0 else "61,214,140")},0.1);border:1px solid rgba({("233,69,96" if balance>0 else "61,214,140")},0.3);border-radius:8px;padding:8px 12px;text-align:center;"><div style="font-size:0.62rem;color:{bal_col};font-weight:700;text-transform:uppercase;margin-bottom:2px;">{_bal_label}</div><div style="font-size:1.2rem;font-weight:900;color:{bal_col};">RM {abs(balance):.2f}</div></div></div>', unsafe_allow_html=True)
+        st.markdown("<div style='font-size:0.7rem;color:#6B7280;margin:6px 0 2px;'>Log bank payment:</div>", unsafe_allow_html=True)
+        _pc1, _pc2 = st.columns([3, 1])
+        with _pc1:
+            _pay_in = st.number_input("Pay RM", min_value=0.0, step=0.5, value=round(balance,2) if balance > 0 else 0.0, key="sed_pay_amt", format="%.2f", label_visibility="collapsed")
+        with _pc2:
+            if st.button("Paid", key="sed_paid_btn", use_container_width=True):
+                if _pay_in > 0:
+                    sed_paid_data["payments"].append({"date": today_iso, "amount": round(_pay_in, 2)})
+                    save_json("sedekah_paid.json", sed_paid_data); st.rerun()
+    with se3:
+        st.markdown(f'<div style="background:#12121F;border:1px solid #252538;border-radius:10px;padding:14px 16px;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center;"><div><div style="font-size:0.58rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Today</div><div style="font-size:1rem;font-weight:800;color:#3DD68C;">{today_sed_str}</div></div><div><div style="font-size:0.58rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">This Week</div><div style="font-size:1rem;font-weight:800;color:#C9A84C;">RM {week_sed:.2f}</div></div></div><div style="margin-top:10px;padding-top:10px;border-top:1px solid #1A1A2E;display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center;"><div><div style="font-size:0.58rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">This Month</div><div style="font-size:1rem;font-weight:800;color:#9B72CF;">RM {month_sed:.2f}</div></div><div><div style="font-size:0.58rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">All Time</div><div style="font-size:1rem;font-weight:800;color:#4EA8DE;">RM {all_sed:.2f}</div></div></div></div>', unsafe_allow_html=True)
 
     # ── LANGUAGE MISSION ──────────────────────────────────────
     sec("🌍", "Language Mission", "How many more today?")
@@ -642,10 +699,19 @@ if page == "🏠  Home":
         gc     = GANTT_COL.get(cat, "#C9A84C")
         with col:
             st.markdown(f'<div class="card" style="text-align:center;border-top:3px solid {gc};border-left:none;padding:10px;"><div style="font-size:0.64rem;color:{gc};font-weight:700;margin-bottom:4px;">{cat}</div><div style="font-size:1.2rem;font-weight:800;color:white;">{done_g}/{len(items)}</div><div class="pb-wrap" style="margin-top:5px;"><div class="pb-fill" style="width:{pct_g}%;background:{gc};"></div></div></div>', unsafe_allow_html=True)
+    GANTT_NOTES = {
+        "🕌 Ibadah": "These are your DAILY spiritual non-negotiables. Each one is already tracked on this Home page (Solat checkboxes, Selawat counter, Sedekah log, Deen section). Tick here to confirm you've built the full habit — not just done it once.",
+        "✨ Glow Up": "Long-term body & beauty goals. Teeth: brush + floss daily, Saturday deep clean with Waterfloss + Oral-B string floss. Hair: daily (Shiseido Sublimic OS, UNOVE EX, Kérastase Elixir Ultime) + Saturday deep care (Selsun Blue, Tsubaki Premium EX Mask). Body: daily (Dr Ko 336) + Saturday (FRESHOP scrub, IPL, shave Friday night). See Glow Up → Routine tab for full weekly schedule.",
+        "🌟 Dream Girl": "Your long-term wealth, career & language empire. Languages tracked daily. Business revenue tracked by section. Investment portfolio growing toward RM1M by 2040.",
+        "🎨 Hobby": "Passion projects — these are not urgent, but they feed your soul. Animation progress tracked in Career Syllabus. Martial arts + pilates tied to exercise routine.",
+        "🏡 Independent": "These are your DAILY household responsibilities. Like Ibadah, these are daily habits to build — laundry (wash, dry, fold), cook + clean kitchen, tidy + vacuum house, cat care (food, water, litter, grooming). Tick when the habit is fully automatic.",
+    }
     with st.expander("Check off your life goals →"):
         for cat, items in GANTT_GOALS.items():
             gc = GANTT_COL.get(cat, "#C9A84C")
-            st.markdown(f'<div style="font-size:0.72rem;font-weight:700;color:{gc};text-transform:uppercase;letter-spacing:1px;margin:14px 0 6px;">{cat}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size:0.72rem;font-weight:700;color:{gc};text-transform:uppercase;letter-spacing:1px;margin:14px 0 4px;">{cat}</div>', unsafe_allow_html=True)
+            if cat in GANTT_NOTES:
+                st.markdown(f'<div style="font-size:0.74rem;color:#6B7280;line-height:1.55;background:rgba(107,114,128,0.08);border-left:2px solid {gc};border-radius:0 6px 6px 0;padding:6px 10px;margin-bottom:8px;">{GANTT_NOTES[cat]}</div>', unsafe_allow_html=True)
             for i, item in enumerate(items):
                 gkey = f"g_{cat}_{i}"
                 g_done = gantt_data.get(gkey, False)
@@ -1346,46 +1412,92 @@ elif page == "🌍  Languages":
         ])
 
         sec("📚","Full Language Curriculum")
+        lang_prog = load_json("lang_progress.json", {})
+
+        def _course_row(key, label, hours, url, colour):
+            pct = lang_prog.get(key, 0)
+            bar_fill = "#3DD68C" if pct >= 100 else colour
+            status_icon = "✅" if pct >= 100 else ("🔄" if pct > 0 else "⏳")
+            link_btn = f'<a href="{url}" target="_blank" style="background:rgba(78,168,222,0.1);color:#4EA8DE;border:1px solid rgba(78,168,222,0.3);padding:3px 10px;border-radius:5px;font-size:0.68rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:8px;">🔗 Open</a>' if url else ""
+            return f'<div style="background:#12121F;border:1px solid #252538;border-radius:8px;padding:10px 14px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px;"><div style="font-size:0.84rem;color:#C8C8D8;flex:1;">{status_icon} {label}{link_btn}</div><div style="font-size:0.72rem;color:#6B7280;white-space:nowrap;">{hours}</div></div><div style="display:flex;align-items:center;gap:10px;"><div class="pb-wrap" style="flex:1;margin:0;height:6px;"><div class="pb-fill" style="width:{pct}%;background:{bar_fill};"></div></div><span style="font-size:0.72rem;color:{bar_fill};font-weight:700;min-width:36px;text-align:right;">{pct}%</span></div></div>'
+
+        def _pct_editor(key, colour, col):
+            with col:
+                pct = lang_prog.get(key, 0)
+                c1, c2, c3 = st.columns([1, 1, 1])
+                with c1:
+                    if st.button("−5", key=f"lp_m_{key}", use_container_width=True):
+                        lang_prog[key] = max(0, pct - 5)
+                        save_json("lang_progress.json", lang_prog); st.rerun()
+                with c2:
+                    st.markdown(f'<div style="text-align:center;font-size:0.8rem;font-weight:700;color:{colour};padding-top:6px;">{pct}%</div>', unsafe_allow_html=True)
+                with c3:
+                    if st.button("+5", key=f"lp_p_{key}", use_container_width=True):
+                        lang_prog[key] = min(100, pct + 5)
+                        save_json("lang_progress.json", lang_prog); st.rerun()
+
+        JP_COURSES = [
+            ("jp_n5",     "JLPT N5 Elementary (Udemy)",              "21.5h", "https://www.udemy.com/share/1013qG3@v76pmfRvHl0dvxEMcjov4SFi3YuWbjJBmmZbirkhZZtifHenS5oftU8A0owD1jRhaA==/"),
+            ("jp_n4",     "JLPT N4 Elementary (Udemy)",              "14.0h", "https://www.udemy.com/share/1021SC3@6ELDUiwme69pKaaKiKOP00Q_xctfaA3TIgz9KzyD5PzGGXPcbnob0SbsP3V5J_t5LA==/"),
+            ("jp_n3",     "JLPT N3 Intermediate (Udemy)",            "10.5h", "https://www.udemy.com/share/101XSO3@odx_MbbhV5GhnXwYYyyU9qfd8z4frySNvDCMj-cqp7dzFyfZvCkeQ6GezJFK0qIEog==/"),
+            ("jp_n2",     "JLPT N2 Intermediate (Udemy)",            "11.0h", "https://www.udemy.com/share/10210A3@KPZ7pyqADh5rLBtOUowFVzVpu-i3Jk_JNByOTPmtO5ZgaZqFK7nnmg7OJdYjoduN6Q==/"),
+            ("jp_n1",     "JLPT N1 Advanced (Udemy)",                "11.5h", "https://www.udemy.com/share/101ZY83@C9R3ezr5W5Qe4vuA0urXBVKzTyleQGqZ7SaulfvLVHiKUq7zDTUdK22ZYf9yHuj6uw==/"),
+            ("jp_speak",  "Non-stop Japanese Speaking (Udemy)",      "50.0h", "https://www.udemy.com/share/10460g3@dLdrGtQs-ZHu_ajScT6OOOTYWatJPwmk0INFhNeo4SIFgiw7E6QDMOzZxpDA5HkJnw==/"),
+        ]
+        MN_COURSES = [
+            ("mn_hsk13",  "Chinese for Beginners: HSK1–3 (Udemy)",   "26.5h", "https://www.udemy.com/share/101xeA3@dEDJaVNDjpVEa_uGImuhlTlFxGySv1sJD00dObWR_LzF2grq3Sd77eYMSGxtbc0Tgw==/"),
+            ("mn_cant",   "Cantonese Beginners: Starts from Zero",    "7.5h",  "https://www.udemy.com/share/10a5XY3@LJ6WgtrmwjVMATcCLTv2Ep4-CXs1Go91qUOQ-0zAArUf584hYiqC8DnC_N3UA4ypWA==/"),
+            ("mn_pod",    "ChinesePod (full podcast library)",         "1,390h",""),
+            ("mn_hsk1",   "HSK 1 YouTube Playlist (194 videos)",      "194 vids","https://youtube.com/playlist?list=PL5Qr-R3Zw136pdfEZuRKiheLG87f2At6V&si=2TZaEX9uihgZ_ToG"),
+            ("mn_hsk2",   "HSK 2 YouTube Playlist (197 videos)",      "197 vids","https://youtube.com/playlist?list=PL5Qr-R3Zw135jyYij4AkOUYFtQMaFwnoN&si=kE36kZKUVZ4cS_kw"),
+            ("mn_hsk3",   "HSK 3 YouTube Playlist (237 videos)",      "237 vids","https://youtube.com/playlist?list=PL5Qr-R3Zw135axoVDAnpXMyuXRcgF8EHU&si=REsGqd2SGcWKchgH"),
+            ("mn_hsk4",   "HSK 4 YouTube Playlist (216 videos)",      "216 vids","https://youtube.com/playlist?list=PL5Qr-R3Zw13457_lCvWGTaPegVDeDnfVL&si=xx8pbeQPVkuUm7nb"),
+            ("mn_hsk5",   "HSK 5 YouTube Playlist (191 videos)",      "191 vids","https://youtube.com/playlist?list=PL5Qr-R3Zw1378BLDnseJusAmU7i5ptZcZ&si=FFzOc97TnSyzkBls"),
+            ("mn_hsk6",   "HSK 6 YouTube Playlist (162 videos)",      "162 vids","https://youtube.com/playlist?list=PL5Qr-R3Zw136ZA3Ceoq3e3edEo2EVj3ox&si=gazCFPasDYQQuIWZ"),
+            ("mn_hsk79",  "HSK 7–9 YouTube Playlist (49 videos)",     "49 vids", "https://youtube.com/playlist?list=PL5Qr-R3Zw134pLKqRz4LtbpOLjAwM6yvi&si=0asbylBqi5S5sfSO"),
+            ("mn_stories","Short Stories Playlist",                    "—",      "https://youtube.com/playlist?list=PL5Qr-R3Zw136K-rcGX8kpWX_3km1z0P6P&si=opw5L329Wc1-a3qU"),
+            ("mn_hanzi",  "Hanzi Hero — 5,000 Chinese Words",         "5,000w", "https://hanzihero.com/simplified/words"),
+        ]
+        KR_COURSES = [
+            ("kr_main",   "The Complete Korean Course (10 in 1, Udemy)","74.0h","https://www.udemy.com/share/101Gw83@4aQp86POZKgZktgRHcTb-jrUp1gQDU0bDB4shTAdPUQQzQP-HD9eE1HLy573z-eDTw==/"),
+        ]
+        FUTURE_COURSES = [
+            ("fu_arabic", "Arabic — Arabic Language in 6 MONTHS (Udemy)","199.5h","https://www.udemy.com/share/105kL03@UdtU2Xqb4puJzruZJmj8_c3wxUQxxEAuSs99d6lHdly1kPstfszPbqlEq-PWW2i4Jw==/"),
+            ("fu_english","English — A Complete English Course (Udemy)", "43.0h", "https://www.udemy.com/share/101Y4o3@hmausq7AvFrouY50h0vUHUAz61OY5V2FfOeEjfJsQXA6G_emJwO7UPF6sXnZxo4z1w==/"),
+            ("fu_tamil",  "Tamil — Learn Tamil Through English (Udemy)", "14.0h", "https://www.udemy.com/share/1028sQ3@HX9OjbhxIhKWPqroVQCuqYXtlKeZK6RiSEkWTkORruwmtimidD9yKwiMEI82uISNiw==/"),
+            ("fu_german", "German — German for You A1/A2 (Udemy)",       "18.5h", "https://www.udemy.com/share/101sto3@WJoxlMRT-EoWrngWs2LNLkArMtX8EVLkgRbgCj1-I0tC1qSE5K4qvhEQR4cO_EgQlw==/"),
+        ]
+
+        st.markdown('<div style="font-size:0.72rem;color:#6B7280;margin-bottom:8px;">Click <b>−5 / +5</b> next to each course to update your completion %.</div>', unsafe_allow_html=True)
 
         with st.expander("🇯🇵  Japanese — JLPT N5 → N1 (68.5h total)"):
-            tbl(["Level","Course","Hours","Status"],[
-                ["N5","JLPT N5 Level Elementary Japanese Study Course (Udemy)","21.5h","✅ Done"],
-                ["N4","JLPT N4 Level Elementary Japanese Study Course (Udemy)","14.0h","✅ Done"],
-                ["N3","JLPT N3 Level Intermediate Japanese Study Course (Udemy)","10.5h","🔄 90%"],
-                ["N2","JLPT N2 Level Intermediate Japanese Study Course (Udemy)","11.0h","🔄 40%"],
-                ["N1","JLPT N1 Level Advanced Japanese Study Course (Udemy)","11.5h","🔄 70%"],
-                ["Speaking","Non-stop Japanese Speaking Course for Beginners (Udemy)","50.0h","🔄 60%"],
-            ])
+            jp_total = len(JP_COURSES); jp_done = sum(1 for k,*_ in JP_COURSES if lang_prog.get(k,0) >= 100)
+            prog_bar(jp_done, jp_total, "#4EA8DE", f"{jp_done}/{jp_total} courses complete")
+            for key, label, hours, url in JP_COURSES:
+                c_html, c_edit = st.columns([3, 1])
+                c_html.markdown(_course_row(key, label, hours, url, "#4EA8DE"), unsafe_allow_html=True)
+                _pct_editor(key, "#4EA8DE", c_edit)
 
         with st.expander("🇨🇳  Mandarin — HSK 1 → 9 (ChinesePod + YouTube)"):
-            tbl(["#","Course / Resource","Hours/Videos"],[
-                ["1","Chinese for Beginners: HSK1 to HSK3 (Udemy)","26.5h"],
-                ["2","Cantonese Beginners: Starts from Zero (Udemy)","7.5h"],
-                ["3","ChinesePod (full podcast library)","1,390h"],
-                ["4","HSK 1 YouTube Playlist","194 videos"],
-                ["5","HSK 2 YouTube Playlist","197 videos"],
-                ["6","HSK 3 YouTube Playlist","237 videos"],
-                ["7","HSK 4 YouTube Playlist","216 videos"],
-                ["8","HSK 5 YouTube Playlist","191 videos"],
-                ["9","HSK 6 YouTube Playlist","162 videos"],
-                ["10","HSK 7–9 YouTube Playlist","49 videos"],
-                ["11","Short Stories Playlist","—"],
-                ["12","Hanzi Hero — 5,000 Chinese Words","5,000 words"],
-                ["13","西西歪 Ccwhyao / 鍾明軒 (YouTube creators)","—"],
-            ])
+            mn_total = len(MN_COURSES); mn_done = sum(1 for k,*_ in MN_COURSES if lang_prog.get(k,0) >= 100)
+            prog_bar(mn_done, mn_total, "#C9A84C", f"{mn_done}/{mn_total} resources complete")
+            for key, label, hours, url in MN_COURSES:
+                c_html, c_edit = st.columns([3, 1])
+                c_html.markdown(_course_row(key, label, hours, url, "#C9A84C"), unsafe_allow_html=True)
+                _pct_editor(key, "#C9A84C", c_edit)
+            st.markdown('<div style="font-size:0.72rem;color:#6B7280;margin-top:8px;">Creators: 西西歪 Ccwhyao · 鍾明軒 &nbsp;·&nbsp; <a href="https://youtu.be/22rC5cOCsL0?si=r6EaDubZv1iBpYvp" target="_blank" style="color:#4EA8DE;">西西歪</a> &nbsp;·&nbsp; <a href="https://youtu.be/mw7KyZJQzZA?si=s8v7jcll6qPWcWZA" target="_blank" style="color:#4EA8DE;">鍾明軒</a></div>', unsafe_allow_html=True)
 
         with st.expander("🇰🇷  Korean — 74-hour complete course"):
-            tbl(["Course","Hours"],[
-                ["The Complete Korean Course for Beginners — 10 courses in 1 (Udemy)","74.0h"],
-            ])
+            for key, label, hours, url in KR_COURSES:
+                c_html, c_edit = st.columns([3, 1])
+                c_html.markdown(_course_row(key, label, hours, url, "#3DD68C"), unsafe_allow_html=True)
+                _pct_editor(key, "#3DD68C", c_edit)
 
         with st.expander("🌐  Future Languages (planned)"):
-            tbl(["Language","Course","Hours"],[
-                ["Arabic","Arabic Language in 6 MONTHS through our SYSTEM (Udemy)","199.5h"],
-                ["English","A Complete English Language Course (Udemy)","43.0h"],
-                ["Tamil","Learn Tamil Through English — Read, Write, Speak (Udemy)","14.0h"],
-                ["German","German for You A1/A2 (Udemy)","18.5h"],
-            ])
+            for key, label, hours, url in FUTURE_COURSES:
+                c_html, c_edit = st.columns([3, 1])
+                c_html.markdown(_course_row(key, label, hours, url, "#9B72CF"), unsafe_allow_html=True)
+                _pct_editor(key, "#9B72CF", c_edit)
 
         sec("💡","Strategy")
         rows(["Mandarin in the morning — fresh brain on the MRT or during calm start","Japanese + Korean in the evening — 30 min JP + 30 min KR after Isyak, stop by 9pm","Spaced repetition: review yesterday's words before learning new ones","Group words by theme/context — your brain maps concepts, not isolated words","Pressure-activated: don't force study when brain is off. Trust the flow."])
@@ -1562,51 +1674,51 @@ elif page == "📚  Syllabus":
 
     CAREER_MODULES = [
         {"title":"MICROSOFT EXCEL & DATA","colour":"#3DD68C","icon":"📊","courses":[
-            ("Learn 75+ Excel Formulas for Data Analysis & Business Intelligence","9.5h","Udemy"),
-            ("Ace the Excel MO-201 Exam — Excel Expert Certification (MS Excel 2019)","8.5h","Udemy"),
-            ("Microsoft PL-300 — Power BI Desktop Certification","29.5h","Udemy"),
-            ("Learn Google Sheets — Pivot Tables, QUERY & more","14.5h","Udemy"),
-            ("Microsoft Excel — Excel from Beginner to Advanced","22.0h","Udemy"),
-            ("Tableau — Full course","21.0h","YouTube"),
+            ("Learn 75+ Excel Formulas for Data Analysis & Business Intelligence","9.5h","Udemy","https://www.udemy.com/share/101Wh83@ssPm32yV8hg3MYyFvZxkGXXU9MKN8I3WoCrKG7nmTiGCoMuieTbRRDbAU-nuVLl-Gg==/"),
+            ("Ace the Excel MO-201 Exam — Excel Expert Certification (MS Excel 2019)","8.5h","Udemy","https://www.udemy.com/share/103LoG3@u-ms5D25pVuGAT1BWdUOiC31zqQGiGCtNhbh3vR6APNeltzey3HRkMWWc2GzbUjn8Q==/"),
+            ("Microsoft PL-300 — Power BI Desktop Certification","29.5h","Udemy","https://www.udemy.com/share/102yiC3@woaXnTXz_9NDloDGREvOCAWjpJ4wokIPDw-H7bb6IZ7_Fdq-vqh2P7pIPre7AvU1nA==/"),
+            ("Learn Google Sheets — Pivot Tables, QUERY & more","14.5h","Udemy","https://www.udemy.com/share/103EEL3@9jBDSbF5jjn16T60g1BFz-uGK_Go7BULNMEdg2Hf1BeyThhEpseO8HrkAOC-ix3Djg==/"),
+            ("Microsoft Excel — Excel from Beginner to Advanced","22.0h","Udemy","https://www.udemy.com/share/101Wde3@9ngN7bHzGYEmHqosturZb7NGqLc9EeAIWRPDFwWD_KSOeBQt0JX-fFfbhmOtx40NKg==/"),
+            ("Tableau — Full course","21.0h","YouTube","https://youtu.be/K3pXnbniUcM?si=WIrYR-jAs_GyiA78"),
         ]},
         {"title":"CODING & DEVELOPMENT","colour":"#C9A84C","icon":"💻","courses":[
-            ("100 Days of Code: The Complete Python Pro Bootcamp","56.5h","Udemy"),
-            ("The Complete Full-Stack Web Development Bootcamp","61.5h","Udemy"),
-            ("Java Development Skills","135.5h","Udemy"),
-            ("SQL — Full course","—","YouTube"),
-            ("VBA (already self-taught at work)","—","Self-taught"),
-            ("Flutter (mobile development)","—","Planned"),
-            ("Build & Sell with Claude Code (10+ Hour Course)","10h+","YouTube"),
+            ("100 Days of Code: The Complete Python Pro Bootcamp","56.5h","Udemy","https://www.udemy.com/share/103IHM3@h1Lnic1TAvK8FK-zfLz8cMamHzWeTk5w8qXDVolEzFgFPU8itCnY-7VAl_GtMnUAWg==/"),
+            ("The Complete Full-Stack Web Development Bootcamp","61.5h","Udemy","https://www.udemy.com/share/1013gG3@ptVmdOeBQKS00WxK2Fc1_ZbV8y2TCpPvZRGWzj3Du1TTwU7vEG5WJ0ImcNFBnwFNVg==/"),
+            ("Java Development Skills","135.5h","Udemy","https://www.udemy.com/share/101Wdq3@M3xIHlzn7PYrThaAh0Bz0ePsYLOVgzmGQinIf2NsIPhq41edJ3cKifpCHGfQRzuPsw==/"),
+            ("SQL — Full course","—","YouTube","https://youtu.be/SSKVgrwhzus?si=ho3dvvQMlTeC4PtL"),
+            ("VBA (already self-taught at work)","—","Self-taught",""),
+            ("Flutter (mobile development)","—","Planned",""),
+            ("Build & Sell with Claude Code (10+ Hour Course)","10h+","YouTube","https://youtu.be/mpALXah_PBg?si=Y8Wu-vUWWrhk5QuA&t=2490"),
         ]},
         {"title":"ANIMATION & CREATIVE","colour":"#9B72CF","icon":"🎨","courses":[
-            ("Alex Grigg — Animation course","—","Studio"),
-            ("Frame by Frame Ninja","—","Drive"),
-            ("The Bing String","—","Drive"),
-            ("Seoro Oh — Style animation","—","Drive"),
-            ("Mary Kim — Character animation","—","Drive"),
-            ("Havtza — Animation technique","—","Drive"),
-            ("Howard Whimshurt — Getting Started in 2D Animation","—","Drive"),
-            ("Howard Whimshurt — Mastering 2D Animation","—","Drive"),
-            ("Yutapon Cube — Motion study","—","Drive"),
-            ("Domestika — Animated Illustrations","—","Domestika"),
-            ("Domestika — Dynamic Animation","—","Domestika"),
-            ("Win Heart with Colour","—","SSD Samsung"),
+            ("Alex Grigg — Animation course","—","Studio","https://courses.alexgrigg.studio/courses/2414640/lectures/50944661"),
+            ("Frame by Frame Ninja","—","Drive","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("The Bing String","—","Drive","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("Seoro Oh — Style animation","—","Drive","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("Mary Kim — Character animation","—","Drive","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("Havtza — Animation technique","—","Drive","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("Howard Whimshurt — Getting Started in 2D Animation","—","Drive","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("Howard Whimshurt — Mastering 2D Animation","—","Drive","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("Yutapon Cube — Motion study","—","Drive","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("Domestika — Animated Illustrations","—","Domestika","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("Domestika — Dynamic Animation","—","Domestika","https://drive.google.com/drive/folders/14FpXyde70hrVOKLVTorY4e1NZ3_iJsSj?usp=share_link"),
+            ("Win Heart with Colour","—","SSD Samsung",""),
         ]},
         {"title":"MONEY & BUSINESS","colour":"#E94560","icon":"💰","courses":[
-            ("The Complete Digital Marketing Guide — 27 Courses in 1","86.5h","Udemy"),
-            ("3-in-1 E-Commerce Masterclass — Amazon, Etsy & Pinterest","48.0h","Udemy"),
-            ("Design UI/UX","—","Planned"),
-            ("Build & Sell with Claude Code","10h+","YouTube"),
+            ("The Complete Digital Marketing Guide — 27 Courses in 1","86.5h","Udemy","https://www.udemy.com/share/1013fu3@fLeaH5Hsa5En6zvC72p9mwJSgkP8VzhCjTJqAgxccL2S09BroXb_L5dNErgj8ZSl8w==/"),
+            ("3-in-1 E-Commerce Masterclass — Amazon, Etsy & Pinterest","48.0h","Udemy","https://www.udemy.com/share/108nLs3@whMmuFi-lJJC0m1DZntdR49iMpeigcvUW2h0rA8sJmZ6fk6b-KulDIwawojkI2GFZA==/"),
+            ("Design UI/UX","—","Planned",""),
+            ("Build & Sell with Claude Code","10h+","YouTube","https://youtu.be/mpALXah_PBg?si=Y8Wu-vUWWrhk5QuA&t=2490"),
         ]},
         {"title":"CONSULTING & FINANCE","colour":"#4EA8DE","icon":"📋","courses":[
-            ("Interview Skills for Consulting","4h","Planned"),
-            ("Consulting Frameworks","5h","Planned"),
-            ("Case Study Practice (447 cases)","447","Planned"),
-            ("Acts/Laws — AAA/ATX/Liquidation","3h","ACCA"),
-            ("Calculation & Industry Knowledge","19h","Planned"),
+            ("Interview Skills for Consulting","4h","Planned",""),
+            ("Consulting Frameworks","5h","Planned",""),
+            ("Case Study Practice (447 cases)","447","Planned",""),
+            ("Acts/Laws — AAA/ATX/Liquidation","3h","ACCA",""),
+            ("Calculation & Industry Knowledge","19h","Planned",""),
         ]},
         {"title":"PIANO","colour":"#C9A84C","icon":"🎹","courses":[
-            ("Pianoforall — Incredible New Way To Learn Piano & Keyboard","38.5h","Udemy"),
+            ("Pianoforall — Incredible New Way To Learn Piano & Keyboard","38.5h","Udemy","https://www.udemy.com/share/101WgS3@tCgJ-70BQWvUleD3W9oIBiMJkgdp7cS1LBsButcdWfcZYAHmw8nRzI3cuQFbQR8GiA==/"),
         ]},
     ]
 
@@ -1643,7 +1755,9 @@ elif page == "📚  Syllabus":
     for module in CAREER_MODULES:
         colour = module["colour"]
         with st.expander(f"{module['icon']}  {module['title']}"):
-            tbl(["Course", "Hours", "Source"], [list(c) for c in module["courses"]])
+            for course_name, hours, source, url in module["courses"]:
+                link_html = f'<a href="{url}" target="_blank" style="background:rgba(78,168,222,0.1);color:#4EA8DE;border:1px solid rgba(78,168,222,0.25);padding:3px 10px;border-radius:5px;font-size:0.68rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:8px;">🔗 Open</a>' if url else ""
+                st.markdown(f'<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #1A1A2E;flex-wrap:wrap;gap:4px;"><div style="font-size:0.85rem;color:#C8C8D8;flex:1;">{course_name}{link_html}</div><div style="display:flex;gap:10px;align-items:center;"><span style="font-size:0.72rem;color:#6B7280;">{hours}</span><span style="font-size:0.65rem;background:rgba(107,114,128,0.15);color:#9CA3AF;padding:1px 7px;border-radius:8px;">{source}</span></div></div>', unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1652,7 +1766,7 @@ elif page == "📚  Syllabus":
 elif page == "✨  Glow Up":
     page_header("Glow Up", "Clothing · Exercise · Self-development · Makeup · Body Goal")
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["👗  Clothing", "🏃  Exercise", "🌱  Self-Dev", "💄  Makeup", "🎯  Body Goal"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["👗  Clothing", "🏃  Exercise", "🌱  Self-Dev", "💄  Makeup", "🎯  Body Goal", "🗓️  Routine"])
 
     with tab1:
         sec("👗", "Clothing & Style Resources")
@@ -1758,6 +1872,89 @@ elif page == "✨  Glow Up":
                     st.markdown(f'<div style="font-size:0.82rem;margin-top:8px;color:{def_col};">{def_str}</div>', unsafe_allow_html=True)
                     if entry.get("notes"):
                         st.markdown(f'<div style="font-size:0.82rem;color:#6B7280;margin-top:4px;">{entry["notes"]}</div>', unsafe_allow_html=True)
+
+    with tab6:
+        page_header("Glow Up Routine", "Daily & weekly beauty care with products")
+
+        def _routine_block(title, colour, daily_items, weekly_items, weekly_label="Saturday"):
+            st.markdown(f'<div style="font-size:0.78rem;font-weight:700;color:{colour};text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;">{title}</div>', unsafe_allow_html=True)
+            r1, r2 = st.columns(2)
+            with r1:
+                html = f'<div style="background:#12121F;border:1px solid #252538;border-top:3px solid {colour};border-radius:10px;padding:14px 16px;"><div style="font-size:0.65rem;color:{colour};font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Daily</div>'
+                for item in daily_items:
+                    html += f'<div style="font-size:0.84rem;color:#C8C8D8;padding:5px 0;border-bottom:1px solid #1A1A2E;">• {item}</div>'
+                st.markdown(html + '</div>', unsafe_allow_html=True)
+            with r2:
+                html2 = f'<div style="background:#12121F;border:1px solid #252538;border-top:3px solid {colour};border-radius:10px;padding:14px 16px;"><div style="font-size:0.65rem;color:{colour};font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">{weekly_label}</div>'
+                for item in weekly_items:
+                    html2 += f'<div style="font-size:0.84rem;color:#C8C8D8;padding:5px 0;border-bottom:1px solid #1A1A2E;">• {item}</div>'
+                st.markdown(html2 + '</div>', unsafe_allow_html=True)
+
+        sec("😁", "Teeth")
+        _routine_block(
+            "Teeth Care", "#C9A84C",
+            daily_items=["Brush teeth (morning + night)", "Floss or water flosser"],
+            weekly_items=["Waterfloss (thorough)", "Oral-B string floss — all gaps", "Tongue scraper"],
+            weekly_label="Saturday Deep Clean"
+        )
+
+        sec("💇", "Hair")
+        _routine_block(
+            "Hair Care", "#4EA8DE",
+            daily_items=[
+                "Shiseido Sublimic Aqua Intensive OS (leave-in / heat protect)",
+                "UNOVE Treatment EX — apply mid-length to ends before styling",
+                "Kérastase Elixir Ultime — 1–2 drops on dry ends",
+                "Brush gently, avoid over-washing",
+            ],
+            weekly_items=[
+                "Selsun Blue shampoo — apply to scalp, leave 5 min before rinsing",
+                "Tsubaki Premium EX Mask — apply after shampoo, leave 5 min",
+                "Deep condition + scalp massage",
+                "Air-dry where possible",
+            ],
+            weekly_label="Saturday Deep Care"
+        )
+
+        sec("🧴", "Body")
+        _routine_block(
+            "Body Care", "#3DD68C",
+            daily_items=[
+                "Shower — wash properly, focus on dark areas",
+                "Dr Ko 336 lotion — apply after shower to dark/problem areas",
+                "Moisturize full body",
+                "Deodorant + fragrance (Delina Lychee)",
+            ],
+            weekly_items=[
+                "FRESHOP scrub — exfoliate full body (focus: arms, legs, underarm, bikini)",
+                "IPL session — underarm, legs, bikini line",
+                "Friday night: shave before IPL on Saturday",
+                "Dr Ko 336 — extra application on treated areas after IPL",
+            ],
+            weekly_label="Saturday (+ Shave Friday)"
+        )
+
+        sec("🗓️", "Weekly Schedule")
+        WEEKLY_SCHEDULE = [
+            ("Monday",    "#C9A84C", ["Brush + floss", "Hair serum", "Body lotion", "Morning skincare", "Evening skincare"]),
+            ("Tuesday",   "#4EA8DE", ["Brush + floss", "Hair serum", "Body lotion", "Skincare routine"]),
+            ("Wednesday", "#9B72CF", ["Brush + floss", "Hair serum", "Body lotion", "Skincare routine"]),
+            ("Thursday",  "#3DD68C", ["Brush + floss", "Hair serum", "Body lotion", "Skincare routine"]),
+            ("Friday",    "#E94560", ["Brush + floss", "Hair serum", "Body lotion", "Skincare routine", "🪒 Shave (prep for Saturday IPL)"]),
+            ("Saturday",  "#C9A84C", ["Selsun Blue shampoo → Tsubaki EX Mask", "Waterfloss + Oral-B string floss", "FRESHOP body scrub", "IPL — underarm, legs, bikini", "Dr Ko 336 on treated areas", "Full skincare + Gua sha", "Kérastase Elixir Ultime on ends"]),
+            ("Sunday",    "#6B7280", ["Rest — light routine only", "Moisturise + hydrate", "Face mask if needed"]),
+        ]
+        day_cols = st.columns(7)
+        for col, (day, col_hex, items) in zip(day_cols, WEEKLY_SCHEDULE):
+            is_today = day == today_name
+            border = f"border-top:3px solid {col_hex};" if is_today else "border-top:1px solid #252538;"
+            html = f'<div style="background:{"rgba(201,168,76,0.06)" if is_today else "#12121F"};border:1px solid #252538;{border}border-radius:8px;padding:10px 8px;"><div style="font-size:0.65rem;font-weight:700;color:{col_hex};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">{day[:3]}</div>'
+            for item in items:
+                html += f'<div style="font-size:0.68rem;color:#C8C8D8;padding:3px 0;border-bottom:1px solid #1A1A2E;line-height:1.4;">• {item}</div>'
+            col.markdown(html + '</div>', unsafe_allow_html=True)
+
+        sec("🌿", "Face & Skincare")
+        hl("<b style='color:#C9A84C;'>Daily:</b> Cleanse → toner → serum → moisturiser → SPF (morning) &nbsp;·&nbsp; <b style='color:#4EA8DE;'>Weekly:</b> Gua sha massage, sheet mask, Vitamin C serum boost &nbsp;·&nbsp; <b style='color:#E94560;'>IPL:</b> Every Saturday on clear skin (shaved the night before)")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
