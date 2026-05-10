@@ -68,8 +68,11 @@ CSS = """
 .mantra-box { background:#0D1A2E;border:1px solid rgba(78,168,222,0.3);border-left:4px solid #4EA8DE;border-radius:10px;padding:14px 18px;font-size:0.88rem;font-weight:700;color:#4EA8DE;letter-spacing:0.3px;line-height:1.55; }
 .deen-card { background:linear-gradient(135deg,#0D1A10 0%,#0B1A14 100%);border:1px solid rgba(61,214,140,0.2);border-left:4px solid #3DD68C;border-radius:12px;padding:16px 20px; }
 #MainMenu, footer, header { visibility: hidden; }
-[data-testid="stSidebar"] > div { background: #0D0D1A !important; }
+section[data-testid="stSidebar"] { display: none !important; }
+[data-testid="stSidebarCollapsedControl"] { display: none !important; }
 div[data-testid="stExpander"] details { background: #12121F !important; border: 1px solid #252538 !important; border-radius: 10px !important; }
+.nav-bar button { border-radius: 8px !important; font-size: 0.78rem !important; padding: 6px 4px !important; }
+div[data-testid="stMainBlockContainer"] { padding-top: 12px !important; }
 @media (max-width: 768px) {
   .card { padding: 12px 14px !important; margin-bottom: 8px !important; }
   .hero { padding: 18px 16px !important; }
@@ -269,33 +272,50 @@ def load_newsletter():
             sections[current].append(line)
     return sections
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
-with st.sidebar:
-    st.markdown('<div style="color:#C9A84C;font-size:1.5rem;font-weight:800;padding:8px 0 2px;">Bell</div>', unsafe_allow_html=True)
-    st.markdown('<div style="color:#6B7280;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">Know Yourself</div>', unsafe_allow_html=True)
-    st.divider()
-    page = st.radio("", [
-        "🏠  Home",
-        "📖  Biography",
-        "📋  Profile",
-        "🌿  Who I Am",
-        "💪  My Strengths",
-        "🧠  My Mind",
-        "🪞  How I'm Seen",
-        "❤️  How I Love",
-        "🌑  My Patterns",
-        "🤝  My People",
-        "👗  Wardrobe",
-        "📅  Schedule",
-        "🌍  Languages",
-        "📚  Syllabus",
-        "✨  Glow Up",
-        "🎯  Goals",
-        "📰  Newsletter",
-        "✅  Daily Tracker",
-        "💡  Mindset",
-        "📝  My Notes",
-    ], label_visibility="collapsed", key="main_nav")
+# ── Navigation ────────────────────────────────────────────────────────────────
+_TABS = ["🏠  Daily", "📰  Newsletter", "✅  Tracker", "🌿  Me"]
+_ME_MAP = {
+    "Biography":   "📖  Biography",   "Profile":     "📋  Profile",
+    "Who I Am":    "🌿  Who I Am",    "My Strengths":"💪  My Strengths",
+    "My Mind":     "🧠  My Mind",     "How I'm Seen":"🪞  How I'm Seen",
+    "How I Love":  "❤️  How I Love",  "My Patterns": "🌑  My Patterns",
+    "My People":   "🤝  My People",   "Wardrobe":    "👗  Wardrobe",
+    "Schedule":    "📅  Schedule",    "Languages":   "🌍  Languages",
+    "Syllabus":    "📚  Syllabus",    "Glow Up":     "✨  Glow Up",
+    "Goals":       "🎯  Goals",       "Mindset":     "💡  Mindset",
+    "My Notes":    "📝  My Notes",
+}
+
+if "tab"     not in st.session_state: st.session_state.tab     = "🏠  Daily"
+if "me_page" not in st.session_state: st.session_state.me_page = None
+
+def _set_tab(t):
+    st.session_state.tab     = t
+    st.session_state.me_page = None
+
+st.markdown('<div class="nav-bar">', unsafe_allow_html=True)
+_nc = st.columns(4)
+for _col, _t in zip(_nc, _TABS):
+    with _col:
+        st.button(_t, use_container_width=True, key=f"nav_{_t}",
+                  type="primary" if st.session_state.tab == _t else "secondary",
+                  on_click=_set_tab, args=(_t,))
+st.markdown('</div><div style="border-bottom:1px solid #252538;margin:4px 0 18px;"></div>', unsafe_allow_html=True)
+
+tab     = st.session_state.tab
+me_page = st.session_state.me_page
+
+if   tab == "🏠  Daily":       page = "🏠  Home"
+elif tab == "📰  Newsletter":   page = "📰  Newsletter"
+elif tab == "✅  Tracker":      page = "✅  Daily Tracker"
+elif tab == "🌿  Me":
+    page = "__me_grid__" if me_page is None else _ME_MAP.get(me_page, "__me_grid__")
+else:
+    page = "🏠  Home"
+
+if tab == "🌿  Me" and me_page is not None:
+    st.button("← Back", key="back_to_me", on_click=lambda: st.session_state.update({"me_page": None}))
+    st.markdown('<div style="border-bottom:1px solid #252538;margin:4px 0 18px;"></div>', unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -357,9 +377,9 @@ if page == "🏠  Home":
     with mq3:
         st.markdown("<br>", unsafe_allow_html=True)
         st.button("📊 Daily Tracker", use_container_width=True, key="home_nav_dt",
-                  on_click=lambda: st.session_state.update({"main_nav": "✅  Daily Tracker"}))
+                  on_click=lambda: st.session_state.update({"tab": "✅  Tracker"}))
         st.button("📰 Newsletter", use_container_width=True, key="home_nav_nl",
-                  on_click=lambda: st.session_state.update({"main_nav": "📰  Newsletter"}))
+                  on_click=lambda: st.session_state.update({"tab": "📰  Newsletter"}))
 
     # ── DEEN ──────────────────────────────────────────────────
     sec("🕌", "Deen", "Spirit first")
@@ -506,7 +526,7 @@ if page == "🏠  Home":
         else:
             st.markdown('<div style="font-size:0.82rem;color:#6B7280;padding:6px 0;">Weekend — rest day 🌿</div>', unsafe_allow_html=True)
         st.button("📰 Open full newsletter →", key="home_open_nl", use_container_width=True,
-                  on_click=lambda: st.session_state.update({"main_nav": "📰  Newsletter"}))
+                  on_click=lambda: st.session_state.update({"tab": "📰  Newsletter"}))
 
     # ── BODY CHECK ────────────────────────────────────────────
     sec("🌸", "Body Check", "Period · Exercise")
@@ -641,6 +661,40 @@ if page == "🏠  Home":
                 mood_data[today_iso] = lvl; save_json("mood.json", mood_data); st.rerun()
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ME — CARD GRID
+# ═══════════════════════════════════════════════════════════════════════════════
+elif page == "__me_grid__":
+    st.markdown('<div style="color:white;font-size:1.6rem;font-weight:800;margin-bottom:4px;">Me</div>', unsafe_allow_html=True)
+    st.markdown('<div style="color:#6B7280;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;">Know Yourself</div>', unsafe_allow_html=True)
+    _ME_GRID = [
+        ("📖","Biography",   "Your origin story & rare stats",        "gold"),
+        ("📋","Profile",     "Core identity snapshot",                 "blue"),
+        ("🌿","Who I Am",    "Values, character, MBTI deep dive",      "green"),
+        ("💪","My Strengths","What you bring to any room",             "gold"),
+        ("🧠","My Mind",     "How you think & process",               "purple"),
+        ("🪞","How I'm Seen","External perception map",                "blue"),
+        ("❤️","How I Love",  "Attachment, jodoh, love style",          "red"),
+        ("🌑","My Patterns", "Shadow, triggers, growth edges",         "purple"),
+        ("🤝","My People",   "Relationships & dynamics",               "green"),
+        ("👗","Wardrobe",    "Style, colours, signature looks",        "gold"),
+        ("📅","Schedule",    "Routines & time structure",              "blue"),
+        ("🌍","Languages",   "Language learning roadmap",              "green"),
+        ("📚","Syllabus",    "ACCA & study tracker",                   "gold"),
+        ("✨","Glow Up",     "Beauty, health, body goals",             "red"),
+        ("🎯","Goals",       "Life goals & milestones",                "gold"),
+        ("💡","Mindset",     "Manager mode & reset mantras",           "blue"),
+        ("📝","My Notes",    "Saved analysis & observations",          "purple"),
+    ]
+    _COL_HEX = {"gold":"#C9A84C","blue":"#4EA8DE","green":"#3DD68C","purple":"#9B72CF","red":"#E94560"}
+    _gcols = st.columns(4)
+    for _i, (_em, _nm, _desc, _cl) in enumerate(_ME_GRID):
+        with _gcols[_i % 4]:
+            _cx = _COL_HEX.get(_cl,"#C9A84C")
+            st.markdown(f'<div style="background:#12121F;border:1px solid #252538;border-top:3px solid {_cx};border-radius:10px;padding:14px 12px;margin-bottom:4px;"><div style="font-size:1.3rem;">{_em}</div><div style="font-size:0.84rem;font-weight:700;color:white;margin:5px 0 3px;">{_nm}</div><div style="font-size:0.7rem;color:#6B7280;line-height:1.45;">{_desc}</div></div>', unsafe_allow_html=True)
+            st.button("Open →", key=f"me_open_{_nm}", use_container_width=True,
+                      on_click=lambda n=_nm: st.session_state.update({"me_page": n}))
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # BIOGRAPHY
