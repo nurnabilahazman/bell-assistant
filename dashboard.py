@@ -471,14 +471,37 @@ if page == "🏠  Home":
             st.success(f"{len(sunat_checked)}/{len(available_sn)} saved ✓"); st.rerun()
 
     # ── TODAY'S ROUTINE ──────────────────────────────────────────
-    sec("📅", "Today's Routine", "Your autopilot schedule")
-    _sched_items = sched.get("daily_schedule", [])
+    _is_weekend = date.today().weekday() >= 5  # Sat=5, Sun=6
+    _weekend_label = "Saturday" if date.today().weekday() == 5 else "Sunday"
+    sec("📅", "Today's Routine", f"{'🌿 Rest Day — ' + _weekend_label if _is_weekend else 'Autopilot schedule'}")
+
+    # Weekend schedule: remove work blocks & project rotation; keep prayers + personal routines
+    _WEEKEND_SCHED = [
+        {"time": "6:00–7:00 AM",    "activity": "Subuh + Quran / Light Mandarin",   "notes": "Calm morning. No rush. Read Quran or light vocabulary — optional, no pressure."},
+        {"time": "7:00 AM–12:00 PM","activity": "Free Time / Glow Up Routine",       "notes": "Saturday: FRESHOP scrub, IPL, Selsun Blue shampoo, Tsubaki EX Mask, hair care. Sunday: rest, self-care at your own pace."},
+        {"time": "12:00–1:30 PM",   "activity": "Zuhur + Light Meal",                "notes": "Prayer + peaceful lunch."},
+        {"time": "1:30–4:30 PM",    "activity": "Rest / Hobby / Optional Study",     "notes": "Optional: Mandarin or Korean if energy allows. Animation, art journal, or just rest. No guilt either way."},
+        {"time": "4:30–5:10 PM",    "activity": "Asar",                              "notes": "Prayer + reset."},
+        {"time": "5:10–7:00 PM",    "activity": "Free / Family / Errands",           "notes": "Weekend errands, family time, outdoor walk, or quiet rest."},
+        {"time": "7:00–8:00 PM",    "activity": "Maghrib + Dinner",                  "notes": "Slow, peaceful."},
+        {"time": "8:00–9:00 PM",    "activity": "Isyak + Wind Down",                 "notes": "No project rotation on weekends. Relax, dhikr, journal, or light content."},
+        {"time": "After 9:00 PM",   "activity": "REST",                              "notes": "Non-negotiable. Health-first."},
+    ]
+
+    _WORK_KEYWORDS = ("work", "travel home", "project rotation")
+    _sched_raw = sched.get("daily_schedule", [])
+    if _is_weekend:
+        _sched_items = _WEEKEND_SCHED
+    else:
+        _sched_items = [s for s in _sched_raw if not any(kw in s.get("activity","").lower() for kw in _WORK_KEYWORDS)]
+        # Re-insert the full weekday list (work blocks included for Mon–Fri)
+        _sched_items = _sched_raw
+
     if _sched_items:
-        _now_h = datetime.now().hour
-        _now_total = _now_h * 60 + datetime.now().minute
+        import re as _re
+        _now_total = datetime.now().hour * 60 + datetime.now().minute
         def _parse_time(t):
-            import re
-            m = re.search(r'(\d+):(\d+)\s*(AM|PM)?', str(t), re.I)
+            m = _re.search(r'(\d+):(\d+)\s*(AM|PM)?', str(t), _re.I)
             if not m: return -1
             h, mi = int(m.group(1)), int(m.group(2))
             ap = (m.group(3) or "").upper()
@@ -486,14 +509,15 @@ if page == "🏠  Home":
             if ap == "AM" and h == 12: h = 0
             return h * 60 + mi
         _sched_html = '<div style="background:#12121F;border:1px solid #252538;border-radius:10px;padding:4px 0;">'
-        for _si, _s in enumerate(_sched_items):
+        for _s in _sched_items:
             _t_start = _parse_time(_s["time"].split("–")[0].split("-")[0])
-            _t_end   = _parse_time(_s["time"].split("–")[-1].split("-")[-1]) if "–" in _s["time"] or "-" in _s["time"] else _t_start + 60
+            _t_end   = _parse_time(_s["time"].split("–")[-1].split("-")[-1]) if ("–" in _s["time"] or "-" in _s["time"]) else _t_start + 60
             _is_now  = _t_start <= _now_total < _t_end if _t_start >= 0 else False
             _bg      = "background:rgba(201,168,76,0.08);border-left:3px solid #C9A84C;" if _is_now else ""
             _dot_col = "#C9A84C" if _is_now else "#252538"
             _act_col = "#C9A84C" if _is_now else "#C8C8D8"
-            _sched_html += f'<div style="display:flex;gap:12px;align-items:flex-start;padding:9px 16px;border-bottom:1px solid #1A1A2E;{_bg}"><div style="min-width:90px;font-size:0.72rem;color:#6B7280;padding-top:1px;white-space:nowrap;">{_s["time"]}</div><div style="width:8px;height:8px;border-radius:50%;background:{_dot_col};margin-top:5px;flex-shrink:0;"></div><div><div style="font-size:0.84rem;color:{_act_col};font-weight:{"700" if _is_now else "400"};">{_s["activity"]}</div><div style="font-size:0.72rem;color:#6B7280;margin-top:2px;line-height:1.5;">{_s.get("notes","")}</div></div></div>'
+            _fw      = "700" if _is_now else "400"
+            _sched_html += f'<div style="display:flex;gap:12px;align-items:flex-start;padding:9px 16px;border-bottom:1px solid #1A1A2E;{_bg}"><div style="min-width:90px;font-size:0.72rem;color:#6B7280;padding-top:1px;white-space:nowrap;">{_s["time"]}</div><div style="width:8px;height:8px;border-radius:50%;background:{_dot_col};margin-top:5px;flex-shrink:0;"></div><div><div style="font-size:0.84rem;color:{_act_col};font-weight:{_fw};">{_s["activity"]}</div><div style="font-size:0.72rem;color:#6B7280;margin-top:2px;line-height:1.5;">{_s.get("notes","")}</div></div></div>'
         _sched_html += '</div>'
         st.markdown(_sched_html, unsafe_allow_html=True)
     else:
