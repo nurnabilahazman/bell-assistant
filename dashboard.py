@@ -101,7 +101,8 @@ DATA.mkdir(exist_ok=True)
 
 GITHUB_DRAFT_URL = "https://raw.githubusercontent.com/nurnabilahazman/the-bell-newsletter/main/.tmp/draft.md"
 
-def load_json(fp, default):
+@st.cache_data(ttl=300, show_spinner=False)
+def _fetch(fp: str):
     if _supa:
         try:
             r = _supa.table("bell_store").select("value").eq("key", fp).execute()
@@ -111,18 +112,23 @@ def load_json(fp, default):
             pass
     p = DATA / fp
     try:
-        return json.load(open(p)) if p.exists() else default
+        return json.load(open(p)) if p.exists() else None
     except Exception:
-        return default
+        return None
+
+def load_json(fp, default):
+    v = _fetch(fp)
+    return v if v is not None else default
 
 def save_json(fp, obj):
     if _supa:
         try:
             _supa.table("bell_store").upsert({"key": fp, "value": obj}).execute()
-            return
         except Exception:
-            pass
-    json.dump(obj, open(DATA / fp, "w"), indent=2, ensure_ascii=False)
+            json.dump(obj, open(DATA / fp, "w"), indent=2, ensure_ascii=False)
+    else:
+        json.dump(obj, open(DATA / fp, "w"), indent=2, ensure_ascii=False)
+    _fetch.clear()
 
 @st.cache_data
 def load_profile():
