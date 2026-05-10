@@ -2038,18 +2038,23 @@ elif page == "✅  Daily Tracker":
         month_pref2 = date.today().strftime("%Y-%m")
 
         # Solat
+        on_period_dt = td2.get("on_period", False)
+
         sec("🕌", "Solat 5 Waktu")
         SOLAT2 = [("Subuh","🌅"),("Zuhur","☀️"),("Asar","🌤️"),("Maghrib","🌆"),("Isyak","🌙")]
         solat_done2 = td2.get("solat", [])
-        sol_cols = st.columns(5)
-        for col, (name, emoji) in zip(sol_cols, SOLAT2):
-            done = name in solat_done2
-            col.markdown(f'<div style="text-align:center;background:{"rgba(61,214,140,0.12)" if done else "#12121F"};border:1px solid {"rgba(61,214,140,0.4)" if done else "#252538"};border-radius:10px;padding:14px 6px;"><div style="font-size:1.3rem;">{emoji}</div><div style="font-size:0.72rem;color:{"#3DD68C" if done else "#6B7280"};font-weight:700;margin-top:5px;">{name}</div><div style="font-size:0.9rem;margin-top:3px;">{"✓" if done else "—"}</div></div>', unsafe_allow_html=True)
+        if on_period_dt:
+            st.markdown('<div style="background:rgba(233,69,96,0.08);border:1px solid rgba(233,69,96,0.25);border-radius:10px;padding:12px 16px;font-size:0.84rem;color:#E94560;font-weight:700;margin-bottom:6px;">🌸 On period — Prayer paused</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:0.78rem;color:#6B7280;line-height:1.6;margin-bottom:8px;">Focus on dhikr, selawat, istighfar, and dua. Allah knows your effort. 🤍</div>', unsafe_allow_html=True)
+        else:
+            sol_cols = st.columns(5)
+            for col, (name, emoji) in zip(sol_cols, SOLAT2):
+                done = name in solat_done2
+                col.markdown(f'<div style="text-align:center;background:{"rgba(61,214,140,0.12)" if done else "#12121F"};border:1px solid {"rgba(61,214,140,0.4)" if done else "#252538"};border-radius:10px;padding:14px 6px;"><div style="font-size:1.3rem;">{emoji}</div><div style="font-size:0.72rem;color:{"#3DD68C" if done else "#6B7280"};font-weight:700;margin-top:5px;">{name}</div><div style="font-size:0.9rem;margin-top:3px;">{"✓" if done else "—"}</div></div>', unsafe_allow_html=True)
 
         # Sunat
         sec("✨", "Sunat & Spiritual Practice")
         SUNAT2 = [("🌙","Tahajud",True),("🌤️","Dhuha",True),("🕌","12 Solat Sunat",True),("📖","Read Quran",True),("🎧","Tazkirah / Tadabbur",False),("📔","Reflection",False)]
-        on_period_dt = td2.get("on_period", False)
         sunat_done2  = td2.get("sunat", [])
         sn_cols2 = st.columns(6)
         for col, (emoji, name, restricted) in zip(sn_cols2, SUNAT2):
