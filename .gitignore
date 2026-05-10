@@ -1,6 +1,8 @@
 .env
 .streamlit/secrets.toml
 data/
+profile/
+migrate_profile.py
 __pycache__/
 *.pyc
 .DS_Store

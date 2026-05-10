@@ -123,6 +123,13 @@ def save_json(fp, obj):
 
 @st.cache_data
 def load_profile():
+    if _supa:
+        try:
+            r = _supa.table("bell_store").select("key,value").like("key", "profile/%").execute()
+            if r.data and len(r.data) >= 9:
+                return {row["key"].split("/")[1].replace(".json", ""): row["value"] for row in r.data}
+        except Exception:
+            pass
     base = Path(__file__).parent / "profile"
     return {f.stem: json.load(open(f)) for f in base.glob("*.json")}
 
