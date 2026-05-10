@@ -538,17 +538,23 @@ if page == "🏠  Home":
 
     se1, se2, se3 = st.columns([2, 2, 2])
     with se1:
-        st.markdown('<div class="deen-card"><div style="font-size:0.7rem;color:#3DD68C;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Morning Intention</div><div style="font-size:0.87rem;color:#C8C8D8;line-height:1.65;font-style:italic;">"I intend to give in charity today, for the sake of Allah."</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="deen-card"><div style="font-size:0.7rem;color:#3DD68C;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Daily Intention</div><div style="font-size:0.87rem;color:#C8C8D8;line-height:1.65;font-style:italic;">"I intend to give in charity today, for the sake of Allah."</div></div>', unsafe_allow_html=True)
+        if today_sed is not None:
+            st.markdown(f'<div style="font-size:0.78rem;color:#3DD68C;margin-bottom:4px;">Today so far: <b>RM {today_sed:.2f}</b></div>', unsafe_allow_html=True)
         sa, sb = st.columns([3, 1])
         with sa:
-            sed_in = st.number_input("RM", min_value=0.0, step=0.5, value=float(today_sed) if today_sed is not None else 1.0, key="sed_amt", format="%.2f", label_visibility="collapsed")
+            sed_in = st.number_input("Add RM", min_value=0.0, step=0.5, value=1.0, key="sed_amt", format="%.2f", label_visibility="collapsed")
         with sb:
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Log ✓", key="sed_log", use_container_width=True, type="primary"):
-                sedekah_data[today_iso] = round(sed_in, 2)
+            if st.button("+ Add", key="sed_log", use_container_width=True, type="primary"):
+                sedekah_data[today_iso] = round((today_sed or 0) + sed_in, 2)
                 save_json("sedekah.json", sedekah_data); st.rerun()
         if today_sed is not None:
-            st.markdown(f'<div style="font-size:0.78rem;color:#3DD68C;margin-top:6px;">✓ Logged today: <b>RM {today_sed:.2f}</b></div>', unsafe_allow_html=True)
+            _reset_col, _ = st.columns([1, 2])
+            with _reset_col:
+                if st.button("Reset today", key="sed_reset", use_container_width=True):
+                    sedekah_data[today_iso] = 0.0
+                    save_json("sedekah.json", sedekah_data); st.rerun()
     with se2:
         _bal_label = "🟡 Balance to Pay" if balance > 0 else "✅ All Paid"
         st.markdown(f'<div style="background:#12121F;border:1px solid #252538;border-radius:10px;padding:14px 16px;"><div style="font-size:0.6rem;color:#6B7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Payment Tracker</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;"><div><div style="font-size:0.58rem;color:#6B7280;margin-bottom:3px;">Total Recorded</div><div style="font-size:1rem;font-weight:800;color:#C9A84C;">RM {all_sed:.2f}</div></div><div><div style="font-size:0.58rem;color:#6B7280;margin-bottom:3px;">Total Paid</div><div style="font-size:1rem;font-weight:800;color:#3DD68C;">RM {total_paid:.2f}</div></div></div><div style="background:rgba({("233,69,96" if balance>0 else "61,214,140")},0.1);border:1px solid rgba({("233,69,96" if balance>0 else "61,214,140")},0.3);border-radius:8px;padding:8px 12px;text-align:center;"><div style="font-size:0.62rem;color:{bal_col};font-weight:700;text-transform:uppercase;margin-bottom:2px;">{_bal_label}</div><div style="font-size:1.2rem;font-weight:900;color:{bal_col};">RM {abs(balance):.2f}</div></div></div>', unsafe_allow_html=True)
