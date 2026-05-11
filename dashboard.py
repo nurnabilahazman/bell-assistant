@@ -520,20 +520,33 @@ if page == "🏠  Home":
 
     _sched_items = [_period_sub(s) for s in _base_items] if _on_period_r else _base_items
 
-    def _parse_time(t):
+    def _parse_time(t, default_ap=None):
         m = _re.search(r'(\d+):(\d+)\s*(AM|PM)?', str(t), _re.I)
         if not m: return -1
         h, mi = int(m.group(1)), int(m.group(2))
-        ap = (m.group(3) or "").upper()
+        ap = (m.group(3) or default_ap or "").upper()
         if ap == "PM" and h != 12: h += 12
         if ap == "AM" and h == 12: h = 0
         return h * 60 + mi
 
     if _sched_items:
         _sched_html = '<div style="background:#12121F;border:1px solid #252538;border-radius:10px;overflow:hidden;">'
-        for _s in _sched_items:
-            _t_start = _parse_time(_s["time"].split("–")[0].split("-")[0])
-            _t_end   = _parse_time(_s["time"].split("–")[-1].split("-")[-1]) if ("–" in _s["time"] or "-" in _s["time"]) else _t_start + 60
+        for _idx, _s in enumerate(_sched_items):
+            _raw = _s["time"]
+            if "–" in _raw or "-" in _raw:
+                _sep    = "–" if "–" in _raw else "-"
+                _s_str  = _raw.split(_sep)[0].strip()
+                _e_str  = _raw.split(_sep)[-1].strip()
+                _eap_m  = _re.search(r'(AM|PM)', _e_str, _re.I)
+                _eap    = _eap_m.group(1).upper() if _eap_m else None
+                _hint   = _eap if (_eap and not _re.search(r'(AM|PM)', _s_str, _re.I)) else None
+                _t_start = _parse_time(_s_str, _hint)
+                _t_end   = _parse_time(_e_str)
+            else:
+                _t_start = _parse_time(_raw)
+                _t_end   = _t_start + 90 if _t_start >= 0 else -1
+            if _idx == len(_sched_items) - 1 and _t_start >= 0:
+                _t_end = 1440
             _is_now  = _t_start <= _now_total < _t_end if _t_start >= 0 else False
             if _is_now:
                 _row_bg  = "background:rgba(201,168,76,0.13);border-left:4px solid #C9A84C;"
