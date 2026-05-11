@@ -166,14 +166,20 @@ AFFIRMATIONS = [
     "ACCA + Finance + 3 languages + automation + content. You are building a rare life.",
     "When the deadline hits, your brain switches on. Pressure is your fuel.",
     "Your curiosity is a superpower. The ENFP brain maps worlds others cannot see.",
-    # Magnetism & social gravity
+    # Magnetism
     "People feel safe around you. Even animals choose to sit beside you.",
     "You are the kind of person that strangers approach, cats choose, and colleagues orbit.",
-    "You make people feel seen. That is the rarest skill in the world.",
-    "People walk away from conversations with you feeling understood. That is not common — that is you.",
     "You don't try to be magnetic. You just are. People feel it before they understand it.",
     "Strangers tell you things they have never told anyone. Your energy invites honesty.",
     "Most people are either admired or loved. You are both.",
+    "You walk into a room and something shifts. People notice before you say a word.",
+    "Your presence does not demand attention. It earns it.",
+    # Social charisma
+    "You make people feel seen. That is the rarest skill in the world.",
+    "People walk away from conversations with you feeling understood. That is not common — that is you.",
+    "You can make anyone feel like the most important person in the room. That is charisma, and you were born with it.",
+    "You read the room without trying. You always know exactly when to speak and when to hold.",
+    "You are the reason people remember a night. The energy, the warmth, the wit — that was you.",
     # Independent girl
     "You are not waiting to be chosen. You are building the life you want to live.",
     "Your financial independence is not a backup plan — it is the main plan.",
@@ -181,12 +187,34 @@ AFFIRMATIONS = [
     "You do not need anyone to complete your story. You are already writing it.",
     "You leave quietly, without drama. That is self-respect, not coldness.",
     "You are the kind of woman other women want to be friends with. That is everything.",
-    # Lucky girl syndrome & alignment
+    "She is her own destination. Everything else is a bonus.",
+    # Lucky girl syndrome & abundance
     "Good things find you — the right doors, the right timing, the right people. You are a lucky girl. And you earned every bit of it.",
     "Things work out for you. They always have. They always will.",
     "You are in alignment. The right things are finding their way to you right now.",
     "Your timeline is perfect. Everything that is yours is already on its way.",
     "You expect good things to happen — and they do. That is not delusion, that is frequency.",
+    "There is more than enough for you. Success is not scarce, and yours is already written.",
+    "You do not compete. You create. No one else is on your lane.",
+    "Money, opportunities, and the right people flow toward you naturally. You are open to receive.",
+    # Self love
+    "You are your own first love. Everything else is secondary.",
+    "The relationship you have with yourself sets the standard for every other one.",
+    "You choose yourself — not because no one else will, but because you know your own worth.",
+    "Your needs are not too much. You were just giving to people with small capacity.",
+    "Beautiful, capable, and deeply herself. That is a combination that cannot be manufactured.",
+    "You deserve the love you give so freely to everyone else.",
+    # Heartless · let it go · art of not giving a fuck
+    "Not everyone deserves your energy. Selective silence is a superpower.",
+    "You owe no one an explanation for choosing peace.",
+    "The opinions of people who do not pay your bills do not live in your head rent-free.",
+    "You are not cold. You are just done shrinking to make others comfortable.",
+    "Detachment is not indifference. It is knowing your peace is worth more than any argument.",
+    "You stopped carrying people who were fully capable of walking.",
+    "Some doors are worth closing forever. That is not cruelty — that is self-preservation.",
+    "You let it go — not because it did not matter, but because you matter more.",
+    "Unbothered is not a mood. For you, it is a lifestyle.",
+    "You stopped explaining yourself to people who were already decided. That was growth.",
     # Self-knowledge & healing
     "Your warmth is not a weakness — it is the rarest strength in professional environments.",
     "You are not indecisive. You were never given permission to choose for yourself. You can give that now.",
@@ -197,7 +225,6 @@ AFFIRMATIONS = [
     "The things that drained you were not yours to carry.",
     "Still kind after everything. That is not weakness — that is extraordinary strength.",
     "You took the mediator role to survive. You can choose when to put it down.",
-    "Beautiful, capable, and deeply herself. That is a combination that cannot be manufactured.",
     "You are not behind. You are exactly where a woman building something real needs to be.",
 ]
 _aff_h    = (datetime.utcnow() + timedelta(hours=8)).hour
