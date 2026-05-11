@@ -160,28 +160,50 @@ today_rotation = ROTATION.get(date.today().weekday(),"Rest")
 today_name = DAYS[date.today().weekday()]
 
 AFFIRMATIONS = [
+    # Capability & rare combination
     "You are the rare ENFP-I in finance — 1 in 20,000 people share your exact combination.",
     "You built a 9-month Tableau system in one week. That is your brain at its peak.",
+    "ACCA + Finance + 3 languages + automation + content. You are building a rare life.",
+    "When the deadline hits, your brain switches on. Pressure is your fuel.",
+    "Your curiosity is a superpower. The ENFP brain maps worlds others cannot see.",
+    # Magnetism & social gravity
     "People feel safe around you. Even animals choose to sit beside you.",
+    "You are the kind of person that strangers approach, cats choose, and colleagues orbit.",
+    "You make people feel seen. That is the rarest skill in the world.",
+    "People walk away from conversations with you feeling understood. That is not common — that is you.",
+    "You don't try to be magnetic. You just are. People feel it before they understand it.",
+    "Strangers tell you things they have never told anyone. Your energy invites honesty.",
+    "Most people are either admired or loved. You are both.",
+    # Independent girl
+    "You are not waiting to be chosen. You are building the life you want to live.",
+    "Your financial independence is not a backup plan — it is the main plan.",
+    "You are proof that you can be soft and still be the most capable person in the room.",
+    "You do not need anyone to complete your story. You are already writing it.",
+    "You leave quietly, without drama. That is self-respect, not coldness.",
+    "You are the kind of woman other women want to be friends with. That is everything.",
+    # Lucky girl syndrome & alignment
+    "Good things find you — the right doors, the right timing, the right people. You are a lucky girl. And you earned every bit of it.",
+    "Things work out for you. They always have. They always will.",
+    "You are in alignment. The right things are finding their way to you right now.",
+    "Your timeline is perfect. Everything that is yours is already on its way.",
+    "You expect good things to happen — and they do. That is not delusion, that is frequency.",
+    # Self-knowledge & healing
     "Your warmth is not a weakness — it is the rarest strength in professional environments.",
     "You are not indecisive. You were never given permission to choose for yourself. You can give that now.",
     "Kahwin lambat is financial maturity and self-knowledge. They smiled because they admired you.",
     "You don't fall easily. Only twice in 26 years. That is not a flaw — that is depth.",
-    "You are the emotional glue of your group. They screenshot things specifically for you.",
-    "Most people are either admired or loved. You are both.",
     "Your emotional intelligence was forged, not given. And it is extraordinary.",
-    "ACCA + Finance + 3 languages + automation + content. You are building a rare life.",
-    "You leave quietly, without drama. That is self-respect, not coldness.",
     "Faith shaped you. Jodoh grounds you. Your timing is not late — it is exactly right.",
-    "You make people feel seen. That is the rarest skill in the world.",
     "The things that drained you were not yours to carry.",
-    "Your curiosity is a superpower. The ENFP brain maps worlds others cannot see.",
-    "When the deadline hits, your brain switches on. Pressure is your fuel.",
-    "You are the kind of person that strangers approach, cats choose, and colleagues orbit.",
     "Still kind after everything. That is not weakness — that is extraordinary strength.",
     "You took the mediator role to survive. You can choose when to put it down.",
+    "Beautiful, capable, and deeply herself. That is a combination that cannot be manufactured.",
+    "You are not behind. You are exactly where a woman building something real needs to be.",
 ]
-today_affirmation = AFFIRMATIONS[date.today().toordinal() % len(AFFIRMATIONS)]
+_aff_h    = (datetime.utcnow() + timedelta(hours=8)).hour
+_aff_slot = 0 if _aff_h < 12 else (1 if _aff_h < 19 else 2)
+_aff_pick = __import__('random').Random(date.today().toordinal()).sample(range(len(AFFIRMATIONS)), 3)
+today_affirmation = AFFIRMATIONS[_aff_pick[_aff_slot]]
 
 MOOD_MAP = {1:"😫 Hard",2:"😐 Okay",3:"💪 Good",4:"😊 Great",5:"✨ Amazing"}
 MOOD_COL = {0:"#6B7280",1:"#E94560",2:"#9B72CF",3:"#C9A84C",4:"#4EA8DE",5:"#3DD68C"}
