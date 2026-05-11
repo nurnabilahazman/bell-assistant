@@ -102,7 +102,7 @@ DATA.mkdir(exist_ok=True)
 
 GITHUB_DRAFT_URL = "https://raw.githubusercontent.com/nurnabilahazman/the-bell-newsletter/main/.tmp/draft.md"
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=1800, show_spinner=False)
 def _fetch(fp: str):
     if _supa:
         try:
@@ -131,12 +131,18 @@ def save_json(fp, obj):
         json.dump(obj, open(DATA / fp, "w"), indent=2, ensure_ascii=False)
     _fetch.clear()
 
+@st.cache_data(ttl=1800, show_spinner=False)
 def load_profile():
     _PFILES = ['background','feelings','goals','habits','notes','personality','relationships','schedule','wardrobe']
-    result  = {fname: _fetch(f"profile/{fname}.json") for fname in _PFILES}
-    result  = {k: v for k, v in result.items() if v is not None}
-    if result:
-        return result
+    if _supa:
+        try:
+            keys    = [f"profile/{f}.json" for f in _PFILES]
+            rows    = _supa.table("bell_store").select("key,value").in_("key", keys).execute()
+            result  = {r["key"].split("/")[1].replace(".json",""):r["value"] for r in rows.data}
+            if result:
+                return result
+        except Exception:
+            pass
     try:
         base = Path(__file__).parent / "profile"
         return {f.stem: json.load(open(f)) for f in base.glob("*.json")}
@@ -286,7 +292,7 @@ def load_newsletter():
     mtime = None
     # Fetch from GitHub first (works on cloud and locally)
     try:
-        r = _req.get(GITHUB_DRAFT_URL, timeout=10)
+        r = _req.get(GITHUB_DRAFT_URL, timeout=4)
         if r.status_code == 200:
             text = r.text
             mtime = date.today()
