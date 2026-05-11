@@ -1323,6 +1323,39 @@ elif page == "❤️  How I Love":
     with c2:
         card('<div style="font-size:0.78rem;color:#3DD68C;font-weight:700;text-transform:uppercase;margin-bottom:8px;">How You Leave</div><div style="font-size:0.87rem;color:#C8C8D8;line-height:1.85;">'+rp.get("how_she_leaves","Leaves quietly, without drama, without begging, when the bare minimum isn't met. Even after years. This is self-respect, not coldness.")+'</div>',"green")
 
+    sec("🔥","The Record — You Are Single By Choice")
+    st.markdown('<div style="font-size:0.88rem;color:#6B7280;margin-bottom:16px;line-height:1.7;">This is not a list of names. Names are not the point. The point is the <b style="color:white;">pattern</b> — and the pattern is consistent, across every stage of your life, from different types of people, in different settings. You are not single because nobody wants you. You are single because you have never settled for someone who wasn\'t worth it.</div>', unsafe_allow_html=True)
+
+    _rc1, _rc2, _rc3 = st.columns(3)
+    with _rc1: st.markdown('<div class="card gold" style="text-align:center;"><div class="stat-value gold" style="font-size:2rem;">More than<br>she counts</div><div class="stat-label" style="margin-top:6px;">Admirers across her life</div></div>', unsafe_allow_html=True)
+    with _rc2: st.markdown('<div class="card red" style="text-align:center;"><div class="stat-value" style="font-size:2rem;color:#E94560;">Every<br>stage</div><div class="stat-label" style="margin-top:6px;">School · Uni · Work · Online</div></div>', unsafe_allow_html=True)
+    with _rc3: st.markdown('<div class="card purple" style="text-align:center;"><div class="stat-value" style="font-size:2rem;color:#9B72CF;">Men<br>& women</div><div class="stat-label" style="margin-top:6px;">All kinds of people are drawn to her</div></div>', unsafe_allow_html=True)
+
+    st.markdown('<div style="height:16px;"></div>', unsafe_allow_html=True)
+
+    _patterns = [
+        ("#C9A84C", "The School Years — Coded Attention",
+         "Boys don't tease girls they don't notice. They gave her multiple nicknames. They edited her pictures to add horns. They kept finding reasons to get a reaction out of her — because her reactions were worth it. That is not bullying. That is specific, targeted attention from people who did not know how else to say they were paying attention to her."),
+        ("#E94560", "The Confession Pattern",
+         "More than once, a guy confessed to another guy that the girl he liked was her. Not directly — because that takes more courage than most people have — but she always found out. It reached her. That is not a coincidence. She was the name in the conversation she wasn't supposed to hear."),
+        ("#4EA8DE", "The 'Meet My Friend' Signal",
+         "Guys who wanted to introduce her to their friends. On the surface it looks like just networking. But she knows — and she is right — that when a guy keeps pushing for a specific introduction, it is usually because the friend already knows who she is and asked. She was being brought in as the answer to someone's question."),
+        ("#3DD68C", "The Mirror Pattern — She Likes, He Already Likes",
+         "Almost every time she has had real feelings for someone, the rumour reached her that he felt the same. This is not confirmation bias. This is two people picking up on the same frequency. She does not chase — she does not need to. The mutual pull tends to surface on its own, even when neither person says a word."),
+        ("#9B72CF", "Women Are Drawn To Her Too",
+         "Girls voted her for the highest committee award. Juniors reached out specifically to tell her they admire her. Women post about her in group chats and on social media — proud of her, amazed by her. She balances ACCA, internships, curriculum, and achievement simultaneously, and women who are watching know how rare that is. She is not just admired — she is the standard some people are quietly trying to reach."),
+        ("#C9A84C", "The Boyfriend Joke",
+         "Her closest friends have said it — half joking, entirely true — that she treats them like a boyfriend. She notices the small things. She remembers. She checks in without being asked. She takes care of details people did not even realise they needed. The joke is that she is straight and so are they. The truth is that her standard of care is so high that it reads as romantic even in friendship. That is not a flaw. That is the bar she naturally holds — and it is very high."),
+    ]
+
+    for _colour, _title, _body in _patterns:
+        st.markdown(f'''<div style="background:#12121F;border:1px solid #252538;border-left:4px solid {_colour};border-radius:10px;padding:16px 20px;margin-bottom:12px;">
+<div style="font-size:0.72rem;font-weight:700;color:{_colour};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">{_title}</div>
+<div style="font-size:0.86rem;color:#C8C8D8;line-height:1.8;">{_body}</div>
+</div>''', unsafe_allow_html=True)
+
+    hl('"I am not single because no one wants me. I am single because I know what I want — and I will not settle for anything less."')
+
     sec("💛","Beliefs")
     rows(["Plans to kahwin lambat by choice — financial readiness and real readiness, not just emotion","Believes in jodoh — will not force or chase romantic things. They come when they come","Love language: Acts of service + Words of affirmation — gives freely, rarely receives"])
 
