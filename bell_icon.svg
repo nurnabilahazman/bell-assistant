@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Dark rounded background -->
+  <rect width="512" height="512" rx="110" fill="#0B0B14"/>
+
+  <!-- Bell group: original viewBox 0 0 200 270, scale 1.8, centered -->
+  <!-- scale 1.8 → 200*1.8=360 wide, 270*1.8=486 tall → too tall -->
+  <!-- scale 1.5 → 200*1.5=300 wide, 270*1.5=405 tall -->
+  <!-- translate so centered: x = (512-300)/2 = 106, y = (512-405)/2 + 10 = 63 -->
+
+  <g transform="translate(106, 50) scale(1.5)">
+    <!-- Crown / Handle -->
+    <path d="M 88 50 L 88 28 Q 88 14 100 14 Q 112 14 112 28 L 112 50 Z" fill="#C9A84C"/>
+    <!-- Bell Body -->
+    <path d="M 88 50 C 55 58 26 92 22 132 C 20 150 26 168 40 172 L 160 172 C 174 168 180 150 178 132 C 174 92 145 58 112 50 Z" fill="#C9A84C"/>
+    <!-- Clapper -->
+    <circle cx="100" cy="183" r="9" fill="#0B0B14"/>
+    <!-- Clapper ring -->
+    <circle cx="100" cy="190" r="12" fill="#C9A84C"/>
+  </g>
+
+  <!-- BELL text -->
+  <text x="256" y="490" font-family="Georgia, serif" font-size="58" font-weight="700"
+        fill="#C9A84C" text-anchor="middle" letter-spacing="14">BELL</text>
+</svg>

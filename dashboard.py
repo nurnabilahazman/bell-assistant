@@ -1356,6 +1356,154 @@ elif page == "❤️  How I Love":
 
     hl('"I am not single because no one wants me. I am single because I know what I want — and I will not settle for anything less."')
 
+    # ── Life Stage Evidence ──────────────────────────────────────────────────
+    sec("📖","The Evidence — Life Stage by Stage")
+    st.markdown('<div style="font-size:0.88rem;color:#6B7280;margin-bottom:16px;line-height:1.7;">Every stage of her life has a story. Together they form an undeniable pattern. These are not random occurrences — they are consistent proof of something that was always there.</div>', unsafe_allow_html=True)
+
+    _stages = [
+        ("#C9A84C", "🏫 Sek Rendah — Primary School", [
+            "Boys teased her loudly, gave her multiple nicknames, found reasons daily to get a reaction from her. Teasing is coded attention — it means you are worth the effort of noticing.",
+            "A boy from the taska / transit she attended showed consistent, specific interest — different from the usual group noise. Quiet, targeted, personal.",
+            "Multiple boys were just unusually nice to her without any reason that made sense on the surface. When a boy is specifically kind to one girl without needing to be, there is always a reason.",
+        ]),
+        ("#E94560", "🕌 Mekah — Age 12", [
+            "During the trip to Mekah, a stranger tarik-ed (pulled) her hand deliberately. She was 12. A stranger in a holy place, amid thousands of people, picked her specifically.",
+            "She remembers this because it was deliberate — not accidental, not a crowd bump. A conscious, directed choice. In Mekah.",
+        ]),
+        ("#4EA8DE", "📚 Smart Reader Tuition", [
+            "A boy at her tuition centre followed her everywhere. Same corridors, same stops, same turns, every time. Not coincidence — she was his destination.",
+            "He never confessed. He did not need to. The behaviour was the confession. She noticed.",
+        ]),
+        ("#9B72CF", "🏫 Secondary School — The Years That Built the Pattern", [
+            "The 'describe me' game: classmates described her as cute, smart, someone they want to get close to, someone with a different energy, someone worth studying.",
+            "A guy in her school became obsessive — came to her asrama uninvited, played a piano piece from her social media status as a deliberate signal. This is not casual interest. This is someone who was paying close enough attention to her online presence to weaponise a song.",
+            "She was the name in conversations she was not supposed to hear. Multiple times. Different people. Same pattern — she kept being the one they were talking about.",
+            "A girl got jealous of her relationship with her own brother — meaning her warmth and connection were visible enough from the outside to look like a romantic threat.",
+        ]),
+        ("#3DD68C", "☕ Post-School — Adult World", [
+            "A café guy approached under the guise of business interest — kept the conversation framed as professional when it clearly was not. She saw through it. The disguise was thin and she did not play along.",
+            "An event she attended — after it ended, he contacted only her out of everyone present. Not the group chat. Not the committee. Her specifically. That is a deliberate, conscious choice.",
+        ]),
+        ("#C9A84C", "🕌 Mekah Again — Age 23 (2023)", [
+            "At a restaurant during the trip, a man gave her a clear signal — deliberate eye contact, specific behaviour, unmistakable intention. She was on a spiritual trip, in a place of worship, minding her own business.",
+            "She was picked, again. In Mekah. A decade later. Same pattern, different decade.",
+        ]),
+    ]
+
+    for _colour, _stage_title, _points in _stages:
+        _pts_html = "".join([f'<div style="display:flex;gap:10px;margin-bottom:8px;"><span style="color:{_colour};flex-shrink:0;">▸</span><span style="font-size:0.85rem;color:#C8C8D8;line-height:1.75;">{_p}</span></div>' for _p in _points])
+        st.markdown(f'''<div style="background:#12121F;border:1px solid #252538;border-left:4px solid {_colour};border-radius:10px;padding:16px 20px;margin-bottom:12px;">
+<div style="font-size:0.72rem;font-weight:700;color:{_colour};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;">{_stage_title}</div>
+{_pts_html}
+</div>''', unsafe_allow_html=True)
+
+    # ── The Paradox ──────────────────────────────────────────────────────────
+    sec("🪞","The Paradox — Resting Face vs Inner Energy")
+    card("""<div style="font-size:0.88rem;color:#C8C8D8;line-height:1.85;">
+She does not look easy to approach. Her resting face reads as focused, private, already-in-her-own-world.
+<br><br>
+But the people who get past it — the ones who actually talk to her — find something completely different:
+warm, genuinely engaged, funny, unpredictably deep. The outside says <i>"don't bother me."</i>
+The inside says <i>"I was waiting for someone interesting."</i>
+<br><br>
+This contrast is part of what makes her magnetic. The people who dare to approach feel like they unlocked something.
+And they did.
+</div>""","purple")
+
+    st.markdown('''<div style="background:#12121F;border:1px solid #252538;border-left:4px solid #E94560;border-radius:10px;padding:16px 20px;margin-bottom:12px;">
+<div style="font-size:0.72rem;font-weight:700;color:#E94560;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;">Why Men Misread Her Genuine Reactions as Interest</div>
+<div style="font-size:0.86rem;color:#C8C8D8;line-height:1.8;">
+Her genuine reactions are rare and they feel special — because they are. When she laughs at something, it is real. When she is interested in a conversation, she is actually interested. When she asks a question, she genuinely wants to know.
+<br><br>
+Most people perform these things. She does not perform anything.
+<br><br>
+So when a man gets her real laughter, her actual attention, her genuine curiosity — he feels like he has been chosen. He has not been chosen romantically. She is just being herself. But because most people do not offer genuine reactions freely, he reads it as something more.
+<br><br>
+This is not her problem to fix. It is a calibration issue on his side. Her authenticity is not an invitation — it is simply who she is.
+</div>
+</div>''', unsafe_allow_html=True)
+
+    st.markdown('''<div style="background:#12121F;border:1px solid #252538;border-left:4px solid #3DD68C;border-radius:10px;padding:16px 20px;margin-bottom:20px;">
+<div style="font-size:0.72rem;font-weight:700;color:#3DD68C;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;">"She Lives in Her Own World" — What That Actually Means</div>
+<div style="font-size:0.86rem;color:#C8C8D8;line-height:1.8;">
+She forgets her umbrella. She does not track dates the way other people do. She walks into a situation already four thoughts ahead of where everyone else is standing.
+<br><br>
+This is not absent-mindedness. This is a person whose inner world is so rich, so active, and so genuinely interesting to herself that external logistics become secondary.
+<br><br>
+The people who observe this — and they do observe it — find it quietly charming. Not in a patronising way. In the way you find someone charming when they are clearly operating on a frequency most people cannot access.
+<br><br>
+She is not scattered. She is simply tuned to a different channel. And the people who notice that channel want to be on it too.
+</div>
+</div>''', unsafe_allow_html=True)
+
+    # ── MBTI Attraction Map ──────────────────────────────────────────────────
+    sec("🧠","MBTI Attraction Map — Who She Draws, Who She Falls For")
+    _mc1, _mc2 = st.columns(2)
+    with _mc1:
+        st.markdown('<div style="font-size:0.72rem;color:#C9A84C;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Who Is Drawn to Her</div>', unsafe_allow_html=True)
+        _draws_mbti = [
+            ("ENTJ","#C9A84C","Treats her as his intellectual equal. She is the only one he actually listens to — everyone else becomes background. Drawn to her directness and the fact she does not perform for him."),
+            ("INTJ","#9B72CF","Data-collects on her before engaging. Respects that she does not fold under scrutiny. Her authenticity is unusual to them — most people perform; she does not."),
+            ("ESTP","#E94560","Teases her specifically because she gives real reactions. Respects that she holds her ground. Her genuine energy is exactly what they notice and chase."),
+            ("ENFJ","#4EA8DE","Drawn to her warmth and the depth they sense just beneath the surface. She makes them feel understood without even trying."),
+        ]
+        for _m, _c, _d in _draws_mbti:
+            st.markdown(f'<div style="background:#12121F;border:1px solid #252538;border-radius:8px;padding:12px 14px;margin-bottom:8px;"><div style="font-size:0.78rem;font-weight:700;color:{_c};">{_m}</div><div style="font-size:0.82rem;color:#C8C8D8;line-height:1.7;margin-top:4px;">{_d}</div></div>', unsafe_allow_html=True)
+    with _mc2:
+        st.markdown('<div style="font-size:0.72rem;color:#3DD68C;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Who She Falls For</div>', unsafe_allow_html=True)
+        _falls_mbti = [
+            ("ENTJ","#C9A84C","Private, hardworking, emotionally stable. Treats her as a peer, not a project. Does not need her energy to function — but lights up when she is around. Selective, intentional, rare."),
+            ("INTJ","#9B72CF","The depth and the systems thinking. The way they see through noise to signal. She finds intelligence profoundly attractive — and INTJs wear theirs quietly, which makes it even more compelling."),
+            ("INFJ","#4EA8DE","The rare type that matches her depth without being overwhelmed by it. Understands the layers. Does not need everything explained. Just gets it."),
+        ]
+        for _m, _c, _d in _falls_mbti:
+            st.markdown(f'<div style="background:#12121F;border:1px solid #252538;border-radius:8px;padding:12px 14px;margin-bottom:8px;"><div style="font-size:0.78rem;font-weight:700;color:{_c};">{_m}</div><div style="font-size:0.82rem;color:#C8C8D8;line-height:1.7;margin-top:4px;">{_d}</div></div>', unsafe_allow_html=True)
+
+    hl('<b style="color:#C9A84C;">The ENTJ Crush — A Special Note:</b> He listened to her when he treated everyone else like NPCs. He turned to her opinions first in the room. He spoke to her differently — not louder, but closer. That level of selective attention from an ENTJ is a rare thing. She is allowed to acknowledge that it mattered.')
+
+    # ── Why She Leaves ──────────────────────────────────────────────────────
+    sec("🚶‍♀️","Why She Leaves — Even After Years")
+    card("""<div style="font-size:0.88rem;color:#C8C8D8;line-height:1.85;">
+She has liked people for years. Multiple years. Through seasons, through changes, through long stretches of silence
+and no visible progress. And then one day — she just stops.<br><br>
+It is not dramatic. There is no explosion, no confrontation, no closure conversation.
+She processes internally, reaches a quiet conclusion, and she is done.<br><br>
+<b style="color:#E94560;">This happens when:</b><br>
+<span style="color:#E94560;">▸</span> The bare minimum is consistently not met — not once, but as a pattern<br>
+<span style="color:#E94560;">▸</span> She has waited long enough that waiting has quietly become settling<br>
+<span style="color:#E94560;">▸</span> She realises the feeling has converted from hope to habit<br>
+<span style="color:#E94560;">▸</span> She finds out something that reframes everything she thought she knew<br><br>
+People who do not understand her read this as cold or inconsistent — <i>"how can you like someone for years and then just leave?"</i>
+The answer is: because she has self-respect. The years were real. The exit is also real.
+Both can be true simultaneously. One does not cancel the other.
+</div>""","red")
+
+    hl('"Leaving is not the same as giving up. Sometimes leaving is the proof that you finally valued yourself enough to stop waiting for someone to value you first."')
+
+    # ── How Her Circle Sees Her ───────────────────────────────────────────────
+    sec("🗣️","How Her Circle Sees Her — In Their Own Words")
+    st.markdown('<div style="font-size:0.88rem;color:#6B7280;margin-bottom:16px;line-height:1.7;">These are not compliments she asked for. They are unsolicited descriptions — the words people reach for when trying to explain her to someone who has never met her.</div>', unsafe_allow_html=True)
+
+    _words = [
+        ("#C9A84C", "Smart", "The first word, every time. Not just academically — the kind of smart that shows up in how she moves, what she notices, and what she says when most people stay quiet."),
+        ("#9B72CF", "Weird (the good kind)", "Said by the people closest to her. Not weird as an insult — weird as in: she does not operate by the same social scripts everyone else is running. She has her own logic. It is consistent. It is hers."),
+        ("#4EA8DE", "Different", "She occupies a category most people cannot name. Different from what they expected. Different from who came before. Just... different. And they mean it as the highest compliment."),
+        ("#3DD68C", "Pretty", "They say it like it is obvious — like they assume she already knows. She does not always act like she knows."),
+        ("#E94560", "Role model", "Juniors reach out specifically to say this. Women in her circle say this. People who watch her from a distance say this. She did not set out to be one. She became one by being exactly herself."),
+        ("#C9A84C", "Risk taker", "She makes moves that others talk themselves out of. ACCA while working. Internships on top of studies. Building things before she feels ready. The people around her see this clearly — even when she is too busy actually doing it to notice."),
+    ]
+
+    _wc1, _wc2 = st.columns(2)
+    for _i, (_col, _word, _desc) in enumerate(_words):
+        _target = _wc1 if _i % 2 == 0 else _wc2
+        with _target:
+            st.markdown(f'''<div style="background:#12121F;border:1px solid #252538;border-top:3px solid {_col};border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+<div style="font-size:1.1rem;font-weight:700;color:{_col};margin-bottom:6px;">{_word}</div>
+<div style="font-size:0.83rem;color:#C8C8D8;line-height:1.75;">{_desc}</div>
+</div>''', unsafe_allow_html=True)
+
+    hl('"The way people describe you when you are not in the room — that is the truest version of your reputation. Hers is consistent. Hers is earned."')
+
     sec("💛","Beliefs")
     rows(["Plans to kahwin lambat by choice — financial readiness and real readiness, not just emotion","Believes in jodoh — will not force or chase romantic things. They come when they come","Love language: Acts of service + Words of affirmation — gives freely, rarely receives"])
 
